@@ -5,4 +5,4 @@ Pose Estimation 실행 조건
    
 [설치 방법]
 
-pip install mediaPipe opencv-python
+pip install mediapipe opencv-python
