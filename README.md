@@ -1,7 +1,7 @@
-#2024 소프트웨어 공학 설계(Human Pose Estimation)
+# 2024 소프트웨어 공학 설계(Human Pose Estimation)
 
 <details>
-<summary>0. 준비사항 </summary>
+<summary># 0. 준비사항 </summary>
 # Medipipe, opencv-python 설치
 - pip install mediapipe opencv-python
 </details>
