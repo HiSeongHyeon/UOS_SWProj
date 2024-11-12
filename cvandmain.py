@@ -59,7 +59,9 @@ def Login_Window():
         login_win.destroy()
     btn2.config(command=join)
     btn2.pack()
-    
+    global flag_win
+    login_win.protocol("WM_DELETE_WINDOW", quit)
+
     login_win.mainloop()
     
 
@@ -101,6 +103,7 @@ def Join_Window():
     btn_a.config(command=click)
     btn_a.pack()
 
+    join_win.protocol('WM_DELETE_WINDOW', quit)
 
     join_win.mainloop()
 
@@ -149,8 +152,9 @@ def regiPose_Window():
     btn_a.config(command=click)
     btn_a.pack()
 
-    regi_win.mainloop()
+    regi_win.protocol('WM_DELETE_WINDOW', quit)
 
+    regi_win.mainloop()
 
 
 while True:
