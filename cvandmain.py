@@ -72,7 +72,7 @@ def Login_Window():
 
 def Join_Window():
     join_win = Tk()
-    join_win.geometry("540x400+420+200")
+    join_win.geometry("540x340+420+200")
     join_win.resizable(width=0, height=0)
     join_win.title("HPE_Join")
     join_win.configure(bg = 'lightblue')
@@ -144,13 +144,13 @@ def Join_Window():
 
 def RegiPose_Window():
     regi_win = Tk()
-    regi_win.geometry("1000x600+100+100")
+    regi_win.geometry("1000x650+100+50")
     regi_win.title("HPE_Login")
     regi_win.configure(bg='lightblue')
     regi_win.option_add("*Font", "맑은고딕 20")
 
-    lab1 = Label(regi_win, font=("맑은고딕", "10"), background="lightblue")
-    lab1.config(text="카메라를 10초간 응시하세요. 사용자 자세 등록을 실행 중 입니다.")
+    lab1 = Label(regi_win, font=("맑은고딕", "15", "bold"), background="lightblue")
+    lab1.config(text="\n카메라를 10초간 응시하세요. 사용자 자세 등록을 실행 중 입니다.\n")
     lab1.pack()
 
     frm = Frame(regi_win, bg="lightblue", width=120, height=120)
