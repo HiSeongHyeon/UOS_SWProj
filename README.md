@@ -6,6 +6,8 @@
 - pip install mediapipe opencv-python
 </details>
 
+<details>
+<summary> 1. HPE </summary>
 mediapipe의 pose_landmarks에서 반환되는 각 키포인트(landmark)는 NormalizedLandmark 객체로, 이는 x, y, z, visibility의 속성을 가집니다.
 
 따라서 left_shoulder (인덱스 11)의 속성들은 다음과 같습니다:
@@ -52,3 +54,4 @@ About Key Points
 30 - right heel
 31 - left foot index
 32 - right foot index
+</details>
