@@ -18,13 +18,13 @@ db.create_tables()
 
 while True:
     if (flag_win == 1):
-        Login_Window()
+        Login_Window(db)
     elif (flag_win == 2):
-        Join_Window()
+        Join_Window(db)
     elif (flag_win == 3):
-        RegiPose_Window()
+        RegiPose_Window(db)
     elif (flag_win == 4):
-        Main_Window()
+        Main_Window(db)
     else:
         print("비정상적으로 프로그램 작동함.\n")
         quit()
