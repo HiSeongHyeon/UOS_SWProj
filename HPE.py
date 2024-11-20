@@ -99,21 +99,21 @@ def estimation_pose():
         if monitor_near.cnt > 10:
             list[1] = (monitor_near.output/center_shoulder_dist_cho - 1.0)*100
             monitor_near.cnt = 0
-        else:
-            if monitor_near.cnt >= 1:
-                list[1] = 0
-                monitor_near.cnt -= 1
+    else:
+        if monitor_near.cnt >= 1:
+            list[1] = 0
+            monitor_near.cnt -= 1
 
-    elif monitor_far.data > center_shoulder_dist_cho:
+    if monitor_far.data > center_shoulder_dist_cho:
         monitor_far.cnt += 1
         monitor_far.average_output()
         if monitor_far.cnt > 10:
             list[2] = (1.0 - monitor_far.output/center_shoulder_dist_cho)*100
             monitor_far.cnt = 0
-        else:
-            if monitor_far.cnt >= 1:
-                list[2] = 0
-                monitor_far.cnt -= 1    
+    else:
+        if monitor_far.cnt >= 1:
+            list[2] = 0
+            monitor_far.cnt -= 1    
 
     if turttle_neck.data < center_mouth_dist_cho:
         turttle_neck.cnt += 1
@@ -218,9 +218,9 @@ with mp_pose.Pose(
                     print(outputList[i])
 
 
-                #print(f"cnt = {angle_waist.cnt:.4f}")
-                #print(f"data = {angle_waist.data:.4f}")
-                #print(f"output = {angle_waist.output:.4f}")    
+                # print(f"cnt = {angle_waist.cnt:.4f}")
+                # print(f"data = {monitor_far.data:.4f}")
+                # print(f"output = {monitor_far.output:.4f}")    
             else: 
                 cnt += 1
                 if cnt > 10: # 확인 빠르게 하기 위해 10초로 설정, 추후에 1분으로 고치면 될 듯
