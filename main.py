@@ -2,10 +2,11 @@ from DB.Database import Database
 
 # UI 모듈에서 사용하는 함수
 from UI.cvandmain import Login_Window
-from UI.cvandmain import flag_win
 from UI.cvandmain import Join_Window
 from UI.cvandmain import RegiPose_Window
 from UI.cvandmain import Main_Window
+
+import config
 
 # HPE 모듈에서 사용하는 함수
 # from HPE import HPE_test_ver2
@@ -16,14 +17,15 @@ db = Database()
 # 2가지 Table 생성 (1) Database_data (2) HPE
 db.create_tables()
 
+
 while True:
-    if (flag_win == 1):
+    if (config.flag_win == 1):
         Login_Window(db)
-    elif (flag_win == 2):
+    elif (config.flag_win == 2):
         Join_Window(db)
-    elif (flag_win == 3):
+    elif (config.flag_win == 3):
         RegiPose_Window(db)
-    elif (flag_win == 4):
+    elif (config.flag_win == 4):
         Main_Window(db)
     else:
         print("비정상적으로 프로그램 작동함.\n")
