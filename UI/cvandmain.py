@@ -5,6 +5,9 @@ from PIL import ImageTk, Image
 import numpy as np
 from tkinter import Tk, PhotoImage, Label, Entry, Button, Frame, Checkbutton, IntVar
 import time
+import sys, os
+
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 # DB 연결부
 from DB.Database import * # import <사용할 클래스 혹은 함수>
@@ -21,7 +24,7 @@ def Login_Window(db):
     login_win.configure(bg = 'lightblue')
     login_win.option_add("*Font", "맑은고딕 20")
 
-    img1 = PhotoImage(file="C:/Users/jihwa/Desktop/worksp/program/title.png", master=login_win)
+    img1 = PhotoImage(file="UI/title.png", master=login_win)
     img1 = img1.subsample(4)
     lab_logo = Label(login_win)
     lab_logo.config(image=img1, background = "lightblue")
@@ -292,29 +295,29 @@ def Main_Window():
 
     video_play()
 
-    img1 = PhotoImage(file="C:/Users/jihwa/Desktop/worksp/program/picture1.png", master=main_win)
-    img1 = img1.subsample(5)
-    lab_img1 = Label(main_win)
-    lab_img1.config(image=img1, background = "lightblue")
-    lab_img1.place(x=750, y=200)
+    # img1 = PhotoImage(file="C:/Users/jihwa/Desktop/worksp/program/picture1.png", master=main_win)
+    # img1 = img1.subsample(5)
+    # lab_img1 = Label(main_win)
+    # lab_img1.config(image=img1, background = "lightblue")
+    # lab_img1.place(x=750, y=200)
 
-    img2 = PhotoImage(file="C:/Users/jihwa/Desktop/worksp/program/picture2.png", master=main_win)
-    img2 = img2.subsample(5)
-    lab_img2 = Label(main_win)
-    lab_img2.config(image=img2, background = "lightblue")
-    lab_img2.place(x=1000, y=200)
+    # img2 = PhotoImage(file="C:/Users/jihwa/Desktop/worksp/program/picture2.png", master=main_win)
+    # img2 = img2.subsample(5)
+    # lab_img2 = Label(main_win)
+    # lab_img2.config(image=img2, background = "lightblue")
+    # lab_img2.place(x=1000, y=200)
 
-    img3 = PhotoImage(file="C:/Users/jihwa/Desktop/worksp/program/picture3.png", master=main_win)
-    img3 = img3.subsample(5)
-    lab_img3 = Label(main_win)
-    lab_img3.config(image=img3, background = "lightblue")
-    lab_img3.place(x=750, y=450)
+    # img3 = PhotoImage(file="C:/Users/jihwa/Desktop/worksp/program/picture3.png", master=main_win)
+    # img3 = img3.subsample(5)
+    # lab_img3 = Label(main_win)
+    # lab_img3.config(image=img3, background = "lightblue")
+    # lab_img3.place(x=750, y=450)
 
-    img4 = PhotoImage(file="C:/Users/jihwa/Desktop/worksp/program/picture4.png", master=main_win)
-    img4 = img4.subsample(5)
-    lab_img4 = Label(main_win)
-    lab_img4.config(image=img4, background = "lightblue")
-    lab_img4.place(x=1000, y=450)
+    # img4 = PhotoImage(file="C:/Users/jihwa/Desktop/worksp/program/picture4.png", master=main_win)
+    # img4 = img4.subsample(5)
+    # lab_img4 = Label(main_win)
+    # lab_img4.config(image=img4, background = "lightblue")
+    # lab_img4.place(x=1000, y=450)
 
     main_win.protocol('WM_DELETE_WINDOW', quit)
 
