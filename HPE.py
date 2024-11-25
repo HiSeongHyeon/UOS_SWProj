@@ -82,7 +82,7 @@ def estimation_pose():
     list = [0, 0, 0, 0, 0]
 
     # 허리 기울임은 비율로 나타내기 어려움(애초에 0도를 정상으로 시작하기 때문 / 0도~4도 정상 / 4 ~ 7도 주의 / 7 ~ 10도 이상 경고 )
-    if abs(angle_waist.data) > 4:
+    if abs(angle_waist.data) > 1:
         angle_waist.cnt += 1
         angle_waist.average_output()
         if angle_waist.cnt > 10:
@@ -126,7 +126,7 @@ def estimation_pose():
             list[3] = 0
             turttle_neck.cnt -= 1 
             
-    if hands.data < 1:
+    if hands.data < 4:              # 기준에 들어갈 값은 DB에서 불러올 예정
         hands.cnt += 1
         hands.average_output()
         if hands.cnt > 10:
@@ -139,7 +139,30 @@ def estimation_pose():
 
     return list
 
+def result_pose(list):
+    i = 1
 
+    if list[0] < 5:
+        list[0] = 0
+    elif list[0] >= 5 and list[0] < 15:
+        list[0] = 1
+    else:
+        list[0] = 2
+
+    for i in range(1, len(list)-1):
+        if list[i] < 10:
+            list[i] = 0
+        elif list[i] >= 10 and list[i] < 30:
+            list[i] = 1
+        else:
+            list[i] = 2
+
+    if list[4]:
+        list[4] = 1
+    else:
+        list[4] = 0
+
+    return list
     
     
 
@@ -184,8 +207,8 @@ with mp_pose.Pose(
             if results.pose_landmarks:
                 
                 # 단일 키 포인트
-                left_eye = results.pose_landmarks.landmark[2]
-                right_eye = results.pose_landmarks.landmark[6]
+                # left_eye = results.pose_landmarks.landmark[2]
+                # right_eye = results.pose_landmarks.landmark[6]
                 left_shoulder = results.pose_landmarks.landmark[11]
                 right_shoulder = results.pose_landmarks.landmark[12]
                 left_mouth = results.pose_landmarks.landmark[9]
@@ -194,26 +217,27 @@ with mp_pose.Pose(
                 right_ankle = results.pose_landmarks.landmark[29]
 
                 # 합성 키 포인트
-                angle_waist.data = abs(math.degrees(math.atan(right_shoulder.y - left_shoulder.y)/(right_shoulder.x - left_shoulder.x)))
+                angle_shoulder = abs(math.degrees(math.atan(right_shoulder.y - left_shoulder.y)/(right_shoulder.x - left_shoulder.x)))
                 center_shoulder_dist = (left_shoulder.z + right_shoulder.z)/2
                 center_mouth_dist = (left_mouth.z + right_mouth.z)/2
-                left_hand_distance = math.sqrt((left_mouth.x - left_ankle.x)**2 + (left_mouth.y - left_ankle.y)**2)
-                right_hand_distance = math.sqrt((right_mouth.x - right_ankle.x)**2 + (right_mouth.y - right_ankle.y)**2)
+                left_hand_distance = math.sqrt((left_mouth.x - left_ankle.x)**2 + (left_mouth.y - left_ankle.y)**2 + 10*(left_mouth.z - left_ankle.z)**2)
+                right_hand_distance = math.sqrt((right_mouth.x - right_ankle.x)**2 + (right_mouth.y - right_ankle.y)**2 + 10*(right_mouth.z - right_ankle.z)**2)
 
+                angle_waist.data = angle_shoulder
                 monitor_near.data = center_shoulder_dist
                 monitor_far.data = center_shoulder_dist
                 turttle_neck.data = center_mouth_dist
-                hands.data = min(left_hand_distance, right_hand_distance)
+                hands.data = min(left_hand_distance, right_hand_distance) # 여기에 hands visibility를 고려해서 거리 나타내기
                 
                 # 개인 별 바른 자세 데이터(어디에 만들지 잘 모르겠어서 일단 여기에 만들었음)
                 center_shoulder_dist_cho = -0.5
                 center_mouth_dist_cho = -1.1
 
                 # 확인용 코드(값 잘 받는지 확인)
-                print(f"center of shoulder = {center_shoulder_dist:.4f}")
-                print(f"center of shoulder = {monitor_near.output/center_shoulder_dist_cho:.4f}")
+                print(f"hand dist = {hands.data:.4f}")
+                
+                outputList = result_pose(estimation_pose())
 
-                outputList = estimation_pose()
                 for i in range(5):
                     print(outputList[i])
 
