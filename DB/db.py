@@ -57,7 +57,7 @@ class Database:
             self.conn.commit()
             return True
         except sqlite3.IntegrityError:
-            print("이미 존재하는 ID와 PW 조합입니다.")
+            # print("이미 존재하는 ID와 PW 조합입니다.")
             return False
 
     def log_in(self, ID: str, PW: str) -> bool:
