@@ -213,11 +213,22 @@ def RegiPose_Window(db):
     mp_drawing = mp.solutions.drawing_utils
     mp_pose = mp.solutions.pose
 
+    # 이후 판단을 위해 초깃값 생성
+    Initial_last_time = time.time()
+    Initial_cnt = 0
+
     def video_play():
+
+        if config.count_time == 1:
+            config.last_time = Initial_last_time
+            config.cnt = Initial_cnt
+            config.count_time += 1
+
         success, image = cap.read()
         if not success:
             print("카메라 없음")
             return
+        
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = cv2.flip(image, 1)
@@ -233,6 +244,72 @@ def RegiPose_Window(db):
                     mp_pose.POSE_CONNECTIONS,
                     landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2)
                 )
+        
+        current_time = time.time()
+        if current_time - config.last_time >= 1.0:
+
+            # [[틀린 기준 판단]] HPE를 성공한다면 출력 - README 파일의 키포인트 넘버 확인
+            if results.pose_landmarks:
+                # left shoulder (index 11), right shoulder (index 12)
+                # 단일 키 포인트
+                left_shoulder = results.pose_landmarks.landmark[11]
+                right_shoulder = results.pose_landmarks.landmark[12]
+                left_mouth = results.pose_landmarks.landmark[9]
+                right_mouth = results.pose_landmarks.landmark[10]
+                left_ankle = results.pose_landmarks.landmark[28]
+                right_ankle = results.pose_landmarks.landmark[29]
+
+                # angle_shoulder 
+                config.keyPoint_list[0] = abs(math.degrees(math.atan(right_shoulder.y - left_shoulder.y)/(right_shoulder.x - left_shoulder.x)))
+                
+                # center_shoulder_dist 
+                config.keyPoint_list[1] = (left_shoulder.z + right_shoulder.z)/2
+                
+                # center_mouth_dist 
+                config.keyPoint_list[2] = (left_mouth.z + right_mouth.z)/2
+                
+                # left_hand_distance 
+                config.keyPoint_list[3] = math.sqrt(10*(left_mouth.x - left_ankle.x)**2 + (left_mouth.y - left_ankle.y)**2 + 10*(left_mouth.z - left_ankle.z)**2)
+                
+                # right_hand_distance 
+                config.keyPoint_list[4] = math.sqrt(10*(right_mouth.x - right_ankle.x)**2 + (right_mouth.y - right_ankle.y)**2 + 10*(right_mouth.z - right_ankle.z)**2)
+                
+                i=0
+
+                # 자세 등록
+                # 매 초마다 keyPoint_list를 pose_list에 저장(~cnt 9까지), cnt가 10이 되면 기존에 저장해온 값을 평균내서 출력  
+                pose_list = config.save_pose(config.cnt, config.keyPoint_list, config.pose_list, i)
+                
+                # 확인용 출력 코드(이후 삭제 필요)                
+                if config.cnt > 9: 
+                    config.complete = 1            # UI팀에게 넘겨줄 flag
+                    config.cnt = 0
+                    for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                        print(pose_list[j])
+                    db.insert_hpe_data(pose_list[0], pose_list[1], pose_list[2], pose_list[3], pose_list[4])
+                    # for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                    #     pose_list[j] = 0.0
+
+                if config.complete == 1:
+                    guide_lab.config(text = "등록이 완료되었습니다. Register 버튼을 눌러 회원가입을 완료하세요.", fg = "green")
+                    guide_lab.place(x = 49, y = 72)
+                    def click():
+                        config.count_time = 1
+                        config.last_time = 0
+                        config.cnt = 0
+                        config.complete = 0
+                        config.flag_win = 1
+                        regi_win.destroy()
+                    register_button.config(command=click)
+                    register_button.place(x = 205, y = 510)
+                    
+                config.cnt += 1
+            else:
+               # 화면에 keyPoint가 생성되지 않을 경우
+               print("화면에 자세가 보이도록 앉아주세요.")
+
+            # 마지막 출력 시간 갱신
+            config.last_time = current_time
         
         img = Image.fromarray(image)
         imgtk = ImageTk.PhotoImage(image=img)
@@ -257,6 +334,9 @@ def RegiPose_Window(db):
 
 # 화면 4. 메인 window
 def Main_Window(db):
+
+    # 등록된 자세 정보 조회
+    list_from_DB = db.fetch_hpe_data()
 
     # 기본 창 설정
     main_win = Tk()
@@ -302,44 +382,60 @@ def Main_Window(db):
 
     # 알림 이미지 기본값
     # 어깨
-    img1_1 = PhotoImage(file="UI/img/scoliosis_good.png", master=main_win)       # 0단계(good)
-    img1_2 = PhotoImage(file="UI/img/scoliosis_caution.png", master=main_win)    # 1단계
-    img1_3 = PhotoImage(file="UI/img/scoliosis_warning.png", master=main_win)    # 2단계(bad)
+    img1_1 = PhotoImage(file="UI/image/spine1.png", master=main_win)      # 0단계(good)
+    img1_2 = PhotoImage(file="UI/image/picture1.png", master=main_win)    # 1단계
+    img1_3 = PhotoImage(file="UI/image/picture3.png", master=main_win)    # 2단계(bad)
     img1_1 = img1_1.subsample(7)
-    img1_2 = img1_2.subsample(7)
-    img1_3 = img1_3.subsample(7)
+    img1_2 = img1_2.subsample(5)
+    img1_3 = img1_3.subsample(3)
     lbl_img1 = Label(main_win)
     lbl_img1.config(image=img1_1, background = "#CBDAEC")
-    lbl_img1.place(x=750, y=200)
+    lbl_img1.place(x=750, y=170)
 
     # 거북목
-    img2_1 = PhotoImage(file="UI/img/forward_head_good.png", master=main_win)
-    img2_2 = PhotoImage(file="UI/img/forward_head_caution.png", master=main_win)
-    img2_3 = PhotoImage(file="UI/img/forward_head_warning.png", master=main_win)
+    img2_1 = PhotoImage(file="UI/image/neck1.png", master=main_win)
+    img2_2 = PhotoImage(file="UI/image/picture1.png", master=main_win)
+    img2_3 = PhotoImage(file="UI/image/picture3.png", master=main_win)
     img2_1 = img2_1.subsample(7)
-    img2_2 = img2_2.subsample(7)
-    img2_3 = img2_3.subsample(7)
+    img2_2 = img2_2.subsample(5)
+    img2_3 = img2_3.subsample(3)
     lbl_img2 = Label(main_win)
     lbl_img2.config(image=img2_1, background = "#CBDAEC")
-    lbl_img2.place(x=1000, y=200)
+    lbl_img2.place(x=1000, y=170)
 
     # 턱괴기
-    img3_1 = PhotoImage(file="UI/img/chin_hold_good.png", master=main_win)
-    img3_2 = PhotoImage(file="UI/img/chin_hold_warning.png", master=main_win)
-    img3_1 = img3_1.subsample(7)
-    img3_2 = img3_2.subsample(7)
+    img3_1 = PhotoImage(file="UI/image/picture1.png", master=main_win)
+    img3_2 = PhotoImage(file="UI/image/picture3.png", master=main_win)
+    img3_1 = img3_1.subsample(5)
+    img3_2 = img3_2.subsample(5)
     lbl_img3 = Label(main_win)
     lbl_img3.config(image=img3_1, background = "#B0C6E1")
-    lbl_img3.place(x=750, y=450)
+    lbl_img3.place(x=750, y=420)
 
     # 환경 밝기
-    img4_1 = PhotoImage(file="UI/img/brightness_good.png", master=main_win)
-    img4_2 = PhotoImage(file="UI/img/brightness_warning.png", master=main_win)
-    img4_1 = img4_1.subsample(7)
-    img4_2 = img4_2.subsample(7)
+    img4_1 = PhotoImage(file="UI/image/picture1.png", master=main_win)
+    img4_2 = PhotoImage(file="UI/image/picture3.png", master=main_win)
+    img4_1 = img4_1.subsample(5)
+    img4_2 = img4_2.subsample(5)
     lbl_img4 = Label(main_win)
     lbl_img4.config(image=img4_1, background = "#B0C6E1")
-    lbl_img4.place(x=1000, y=450)
+    lbl_img4.place(x=1000, y=420)
+
+    # 내부 함수 2. join: 가입 버튼을 누르면 회원가입 창으로 바꿈
+    def logout():
+        config.flag_win = 1
+        config.count_time = 1
+        config.disappear = 0
+        config.last_time = 0
+        config.cnt = 0
+        config.complete = 0
+        main_win.destroy()
+        
+    # 로그아웃 버튼
+    logout_image = PhotoImage(file = "UI/img/logout_bt.png")
+    logout_button = Button(main_win, image = logout_image, border = 0, bg = "#C2D6E9")
+    logout_button.config(command=logout)
+    logout_button.place(x = 1240, y = 680)
 
 
     # 영상 재생 및 판단하여 알리는 함수
@@ -355,16 +451,17 @@ def Main_Window(db):
             print("카메라 없음")
             return
 
+
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = cv2.flip(image, 1)
         image = cv2.resize(image, (650, 520))
 
         # 그레이스케일로 변환
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        config.gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)        
 
         # 밝기 측정 (평균 계산)
-        config.brightness.data = gray.mean()
-    
+        config.brightness.data = config.gray.mean()
+
 
         with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
             results = pose.process(image)
@@ -400,15 +497,10 @@ def Main_Window(db):
                 config.angle_waist.data = angle_shoulder
                 config.turttle_neck.data = center_mouth_dist
                 config.hands.data = min(left_hand_distance, right_hand_distance)
-                
-                # 개인 별 바른 자세 데이터(어디에 만들지 잘 모르겠어서 일단 여기에 만들었음)
-                center_shoulder_dist_cho = -0.5
-                center_mouth_dist_cho = -1.1
-
-                
+                                
                 
 
-                outputList = config.result_pose(config.estimation_pose(center_mouth_dist_cho))
+                outputList = config.result_pose(config.estimation_pose(list_from_DB[4]))
                 # 어깨 판단 
                 if outputList[0] == 1:
                     lbl_img1.config(image=img1_2, background = "#CBDAEC")
@@ -443,7 +535,8 @@ def Main_Window(db):
                 else:
                     lbl_alarm.config(text = (user_name + "  |  최근 알림: 자세 알림이 없습니다."))
 
-                print("밝기: ", config.brightness.data)
+                print(config.brightness.output)
+
                 for i in range(4):
                     print(outputList[i])
 
