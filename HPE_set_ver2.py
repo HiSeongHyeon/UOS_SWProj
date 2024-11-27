@@ -9,9 +9,6 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 def average_pose(cnt, data, listData, i):
-    if listData[i] is None:
-        listData[i] = 0.0
-        
     if cnt < 10:
         listData[i] = listData[i] + data
         return listData[i]
@@ -22,9 +19,6 @@ def average_pose(cnt, data, listData, i):
         return average 
 
 def save_pose(cnt, keyPoint_list, pose_list, i):
-    if pose_list[i] is None:
-        pose_list[i] = 0.0
-
     for i in range(5):
         pose_list[i] = average_pose(cnt, keyPoint_list[i], pose_list, i)
         
@@ -94,10 +88,10 @@ with mp_pose.Pose(
                 keyPoint_list[2] = (left_mouth.z + right_mouth.z)/2
                 
                 # left_hand_distance 
-                keyPoint_list[3] = math.sqrt((left_mouth.x - left_ankle.x)**2 + (left_mouth.y - left_ankle.y)**2)
+                keyPoint_list[3] = math.sqrt((left_mouth.x - left_ankle.x)**2 + (left_mouth.y - left_ankle.y)**2 + (left_mouth.z - left_ankle.z)**2)
                 
                 # right_hand_distance 
-                keyPoint_list[4] = math.sqrt((right_mouth.x - right_ankle.x)**2 + (right_mouth.y - right_ankle.y)**2)
+                keyPoint_list[4] = math.sqrt((right_mouth.x - right_ankle.x)**2 + (right_mouth.y - right_ankle.y)**2 + (right_mouth.z - right_ankle.z)**2)
                 
                 i=0
 
@@ -107,10 +101,11 @@ with mp_pose.Pose(
                 
                 # 확인용 출력 코드(이후 삭제 필요)                
                 if cnt > 9: 
-                    for j in range(5):
-                        print(pose_list[j])
-
+                    complete = 1            # UI팀에게 넘겨줄 flag
                     cnt = 0
+                    print(complete)
+                    for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                        pose_list[j] = 0.0
 
                 cnt += 1
             else:
