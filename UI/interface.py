@@ -302,41 +302,41 @@ def Main_Window(db):
 
     # 알림 이미지 기본값
     # 어깨
-    img1_1 = PhotoImage(file="UI/image/spine1.png", master=main_win)      # 0단계(good)
-    img1_2 = PhotoImage(file="UI/image/picture1.png", master=main_win)    # 1단계
-    img1_3 = PhotoImage(file="UI/image/picture3.png", master=main_win)    # 2단계(bad)
+    img1_1 = PhotoImage(file="UI/img/scoliosis_good.png", master=main_win)       # 0단계(good)
+    img1_2 = PhotoImage(file="UI/img/scoliosis_caution.png", master=main_win)    # 1단계
+    img1_3 = PhotoImage(file="UI/img/scoliosis_warning.png", master=main_win)    # 2단계(bad)
     img1_1 = img1_1.subsample(7)
-    img1_2 = img1_2.subsample(5)
-    img1_3 = img1_3.subsample(3)
+    img1_2 = img1_2.subsample(7)
+    img1_3 = img1_3.subsample(7)
     lbl_img1 = Label(main_win)
     lbl_img1.config(image=img1_1, background = "#CBDAEC")
     lbl_img1.place(x=750, y=200)
 
     # 거북목
-    img2_1 = PhotoImage(file="UI/image/neck1.png", master=main_win)
-    img2_2 = PhotoImage(file="UI/image/picture1.png", master=main_win)
-    img2_3 = PhotoImage(file="UI/image/picture3.png", master=main_win)
+    img2_1 = PhotoImage(file="UI/img/forward_head_good.png", master=main_win)
+    img2_2 = PhotoImage(file="UI/img/forward_head_caution.png", master=main_win)
+    img2_3 = PhotoImage(file="UI/img/forward_head_warning.png", master=main_win)
     img2_1 = img2_1.subsample(7)
-    img2_2 = img2_2.subsample(5)
-    img2_3 = img2_3.subsample(3)
+    img2_2 = img2_2.subsample(7)
+    img2_3 = img2_3.subsample(7)
     lbl_img2 = Label(main_win)
     lbl_img2.config(image=img2_1, background = "#CBDAEC")
     lbl_img2.place(x=1000, y=200)
 
     # 턱괴기
-    img3_1 = PhotoImage(file="UI/image/picture1.png", master=main_win)
-    img3_2 = PhotoImage(file="UI/image/picture3.png", master=main_win)
-    img3_1 = img3_1.subsample(5)
-    img3_2 = img3_2.subsample(5)
+    img3_1 = PhotoImage(file="UI/img/chin_hold_good.png", master=main_win)
+    img3_2 = PhotoImage(file="UI/img/chin_hold_warning.png", master=main_win)
+    img3_1 = img3_1.subsample(7)
+    img3_2 = img3_2.subsample(7)
     lbl_img3 = Label(main_win)
     lbl_img3.config(image=img3_1, background = "#B0C6E1")
     lbl_img3.place(x=750, y=450)
 
     # 환경 밝기
-    img4_1 = PhotoImage(file="UI/image/picture1.png", master=main_win)
-    img4_2 = PhotoImage(file="UI/image/picture3.png", master=main_win)
-    img4_1 = img4_1.subsample(5)
-    img4_2 = img4_2.subsample(5)
+    img4_1 = PhotoImage(file="UI/img/brightness_good.png", master=main_win)
+    img4_2 = PhotoImage(file="UI/img/brightness_warning.png", master=main_win)
+    img4_1 = img4_1.subsample(7)
+    img4_2 = img4_2.subsample(7)
     lbl_img4 = Label(main_win)
     lbl_img4.config(image=img4_1, background = "#B0C6E1")
     lbl_img4.place(x=1000, y=450)
@@ -359,16 +359,12 @@ def Main_Window(db):
         image = cv2.flip(image, 1)
         image = cv2.resize(image, (650, 520))
 
-
-        ret, frame = cap.read()
-        if not ret:
-            ret = 1
-
         # 그레이스케일로 변환
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         # 밝기 측정 (평균 계산)
-        brightness.data = gray.mean()
+        config.brightness.data = gray.mean()
+    
 
         with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
             results = pose.process(image)
@@ -384,7 +380,6 @@ def Main_Window(db):
 
         # [[판단 시간 설정]] 1초마다 좌표 추출 및 출력
         current_time = time.time()
-        print(current_time - config.last_time)
         if current_time - config.last_time >= 1.0:
             # [[틀린 기준 판단]] HPE를 성공한다면 출력 - README 파일의 키포인트 넘버 확인
             if results.pose_landmarks:
@@ -438,9 +433,9 @@ def Main_Window(db):
 
                 # 환경밝기 판단
                 if outputList[3] == 1:
-                    lbl_img3.config(image=img4_2, background = "#B0C6E1")
+                    lbl_img4.config(image=img4_2, background = "#B0C6E1")
                 else:
-                    lbl_img3.config(image=img4_1, background = "#B0C6E1")
+                    lbl_img4.config(image=img4_1, background = "#B0C6E1")
 
                 # 메시지 변경
                 if (outputList[0] != 0 or outputList[1] != 0 or outputList[2] != 0 or outputList[3] != 0): 
@@ -448,9 +443,7 @@ def Main_Window(db):
                 else:
                     lbl_alarm.config(text = (user_name + "  |  최근 알림: 자세 알림이 없습니다."))
 
-                print(config.hands.output)
-                print(config.brightness.output)
-
+                print("밝기: ", config.brightness.data)
                 for i in range(4):
                     print(outputList[i])
 
