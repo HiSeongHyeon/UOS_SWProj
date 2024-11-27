@@ -2,7 +2,8 @@ import cv2
 import mediapipe as mp
 from PIL import ImageTk, Image
 import numpy as np
-from tkinter import Tk, PhotoImage, Label, Entry, Button, Frame, Checkbutton, IntVar
+from tkinter import Tk, PhotoImage, Label, Entry, Button, Frame, Checkbutton, IntVar, Toplevel, HORIZONTAL
+import tkinter.ttk as ttk
 import time
 import math
 
@@ -335,6 +336,36 @@ def RegiPose_Window(db):
 # 화면 4. 메인 window
 def Main_Window(db):
 
+    # 백그라운드 화면
+    def on_minimize(event=None):
+        new_win = Toplevel()  # 새 창을 Toplevel로 생성
+        new_win.title("백그라운드 알림")
+        def slide(_):
+            new_win.attributes('-alpha',slide_bar.get())
+            slide_label.config(text=str(round(slide_bar.get(),2)))
+        slide_label=Label(new_win,text="투명도 설정")
+        slide_label.pack(side="bottom")
+        slide_bar=ttk.Scale(new_win, from_=0.1, to=1.0 ,value=1,orient=HORIZONTAL,command=slide,length=200)
+        slide_bar.pack(side="bottom")
+
+        # 새 창의 크기 설정
+        win_width = 250
+        win_height = 150
+
+        # 화면의 너비와 높이 가져오기
+        screen_width = new_win.winfo_screenwidth()
+        screen_height = new_win.winfo_screenheight()
+
+        # 창을 화면의 우측 하단에 배치
+        x_pos = screen_width - win_width - 10  # 10px 여백 추가
+        y_pos = screen_height - win_height - 80  # 작업 표시줄 여백 고려
+
+        new_win.geometry(f"{win_width}x{win_height}+{x_pos}+{y_pos}")
+        new_win.attributes('-topmost', True)
+        new_win.attributes('-alpha', 1)
+
+        new_win.mainloop()
+
     # 등록된 자세 정보 조회
     list_from_DB = db.fetch_hpe_data()
 
@@ -348,6 +379,8 @@ def Main_Window(db):
     frame_label = Label(main_win, border = 0, image = frame_photo)
     frame_label.pack(fill = "both", expand = True)
 
+    # 백그라운드 화면 조건
+    main_win.bind("<Unmap>", lambda event: on_minimize() if main_win.state() == "iconic" else None)
 
     # 알림 메시지
     frame_alarm = Frame(main_win, bg = "white", width=750, height=50)
@@ -430,7 +463,7 @@ def Main_Window(db):
         config.cnt = 0
         config.complete = 0
         main_win.destroy()
-        
+
     # 로그아웃 버튼
     logout_image = PhotoImage(file = "UI/img/logout_bt.png")
     logout_button = Button(main_win, image = logout_image, border = 0, bg = "#C2D6E9")
