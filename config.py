@@ -8,8 +8,35 @@ count_time = 1
 disappear = 0
 last_time = 0
 cnt = 0
+gray = 0
+complete = 0
 
+###########################################################################
+#                   자세             등록                                  #
+###########################################################################
 
+def average_pose(cnt, data, listData, i):
+    if cnt < 10:
+        listData[i] = listData[i] + data
+        return listData[i]
+        
+    else:
+        average = listData[i]/10
+        listData[i] = 0.0    
+        return average 
+
+def save_pose(cnt, keyPoint_list, pose_list, i):
+    for i in range(5):
+        pose_list[i] = average_pose(cnt, keyPoint_list[i], pose_list, i)
+        
+    return pose_list
+
+keyPoint_list = [0.0, 0.0, 0.0, 0.0, 0.0]   # 실시간 자세 정보
+pose_list = [0.0, 0.0, 0.0, 0.0, 0.0]       # DB에 저장할 최종 자세 정보
+
+###########################################################################
+#                   자세             판단                                  #
+###########################################################################
 q_angle_waist = Queue(maxsize=10)
 q_tuttle_neck = Queue(maxsize=10)
 q_hands       = Queue(maxsize=10)
