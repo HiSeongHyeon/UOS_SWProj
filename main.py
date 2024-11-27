@@ -1,4 +1,4 @@
-from DB.Database import Database
+from DB.db import Database
 
 # UI 모듈에서 사용하는 함수
 from UI.interface import Login_Window
