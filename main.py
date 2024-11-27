@@ -1,10 +1,10 @@
 from DB.Database import Database
 
 # UI 모듈에서 사용하는 함수
-from UI.UImain import Login_Window
-from UI.UImain import Join_Window
-from UI.UImain import RegiPose_Window
-from UI.UImain import Main_Window
+from UI.interface import Login_Window
+from UI.interface import Join_Window
+from UI.interface import RegiPose_Window
+from UI.interface import Main_Window
 
 import config
 
