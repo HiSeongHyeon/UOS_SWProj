@@ -415,9 +415,9 @@ def Main_Window(db):
 
     # 알림 이미지 기본값
     # 어깨
-    img1_1 = PhotoImage(file="UI/image/spine1.png", master=main_win)      # 0단계(good)
-    img1_2 = PhotoImage(file="UI/image/picture1.png", master=main_win)    # 1단계
-    img1_3 = PhotoImage(file="UI/image/picture3.png", master=main_win)    # 2단계(bad)
+    img1_1 = PhotoImage(file="UI/image/scoliosis_good.png", master=main_win)      # 0단계(good)
+    img1_2 = PhotoImage(file="UI/image/scoliosis_caution.png", master=main_win)    # 1단계
+    img1_3 = PhotoImage(file="UI/image/scoliosis_warning.png", master=main_win)    # 2단계(bad)
     img1_1 = img1_1.subsample(7)
     img1_2 = img1_2.subsample(5)
     img1_3 = img1_3.subsample(3)
@@ -426,9 +426,9 @@ def Main_Window(db):
     lbl_img1.place(x=750, y=170)
 
     # 거북목
-    img2_1 = PhotoImage(file="UI/image/neck1.png", master=main_win)
-    img2_2 = PhotoImage(file="UI/image/picture1.png", master=main_win)
-    img2_3 = PhotoImage(file="UI/image/picture3.png", master=main_win)
+    img2_1 = PhotoImage(file="UI/image/forward_head_good.png", master=main_win)
+    img2_2 = PhotoImage(file="UI/image/forward_head_caution.png", master=main_win)
+    img2_3 = PhotoImage(file="UI/image/forward_head_warning.png", master=main_win)
     img2_1 = img2_1.subsample(7)
     img2_2 = img2_2.subsample(5)
     img2_3 = img2_3.subsample(3)
@@ -437,8 +437,8 @@ def Main_Window(db):
     lbl_img2.place(x=1000, y=170)
 
     # 턱괴기
-    img3_1 = PhotoImage(file="UI/image/picture1.png", master=main_win)
-    img3_2 = PhotoImage(file="UI/image/picture3.png", master=main_win)
+    img3_1 = PhotoImage(file="UI/image/chin_hold_good.png", master=main_win)
+    img3_2 = PhotoImage(file="UI/image/chin_hold_warning.png", master=main_win)
     img3_1 = img3_1.subsample(5)
     img3_2 = img3_2.subsample(5)
     lbl_img3 = Label(main_win)
@@ -446,8 +446,8 @@ def Main_Window(db):
     lbl_img3.place(x=750, y=420)
 
     # 환경 밝기
-    img4_1 = PhotoImage(file="UI/image/picture1.png", master=main_win)
-    img4_2 = PhotoImage(file="UI/image/picture3.png", master=main_win)
+    img4_1 = PhotoImage(file="UI/image/brightness_good.png", master=main_win)
+    img4_2 = PhotoImage(file="UI/image/brightness_warning.png", master=main_win)
     img4_1 = img4_1.subsample(5)
     img4_2 = img4_2.subsample(5)
     lbl_img4 = Label(main_win)
@@ -601,4 +601,3 @@ def Main_Window(db):
     # 종료 키 설정 및 창 루프 생성
     main_win.protocol("WM_DELETE_WINDOW", quit)
     main_win.mainloop()
-
