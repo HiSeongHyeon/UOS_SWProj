@@ -3,145 +3,184 @@ import mediapipe as mp
 import numpy as np
 import time
 import math
+from queue import Queue
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
+q_angle_waist = Queue(maxsize=10)
+q_tuttle_neck = Queue(maxsize=10)
+q_hands       = Queue(maxsize=10)
+q_brightness  = Queue(maxsize=10)
+
+def initialize_queue(size, initial_value):
+    q = Queue(maxsize=size)  # 최대 크기를 설정
+    for _ in range(size):
+        q.put(initial_value)  # 초기값 추가
+    return q
+
+q_angle_waist = initialize_queue(5, 0)
+q_tuttle_neck = initialize_queue(5, 0)
+q_hands = initialize_queue(5, 0)
+q_brightness = initialize_queue(5, 0)
+
 # 판단할 자세별 클래스
 class angle_waist:
-    def __init__(self, cnt = 0, data = 0.0, output = 0.0):
-        self.cnt = cnt 
+    def __init__(self, data, queue, output): 
         self.data = data 
+        self.queue = queue
         self.output = output 
     
     def average_output(self):
-        if self.cnt == 1:
-            self.output += self.data 
-        else:
-            self.output = (self.output + self.data) / 2
+        total = 0
+        temp_list = []
 
-class monitor_near:
-    def __init__(self, cnt = 0, data = 0.0, output = 0.0):
-        self.cnt = cnt
-        self.data = data
-        self.output = output
-    
-    def average_output(self):
-        if self.cnt == 1:
-            self.output += self.data 
-        else:
-            self.output = (self.output + self.data) / 2
+        # 큐 순회하며 합산
+        while not self.queue.empty():
+            item = self.queue.get()
+            total += item
+            temp_list.append(item)
 
-class monitor_far:
-    def __init__(self, cnt = 0, data = 0.0, output = 0.0):
-        self.cnt = cnt
-        self.data = data
-        self.output = output
+        # 원래 큐 상태로 복구
+        for item in temp_list:
+            self.queue.put(item)
+
+        # 평균 계산
+        self.output = total / len(temp_list)
+        return self.output
     
-    def average_output(self):
-        if self.cnt == 1:
-            self.output += self.data 
-        else:
-            self.output = (self.output + self.data) / 2  
+    def Enqueue(self, data):
+        self.queue.get()
+        self.queue.put(data)
 
 class turttle_neck:
-    def __init__(self, cnt = 0, data = 0.0, output = 0.0):
-        self.cnt = cnt
+    def __init__(self, data, queue, output):
         self.data = data
+        self.queue = queue
         self.output = output
     
     def average_output(self):
-        if self.cnt == 1:
-            self.output += self.data 
-        else:
-            self.output = (self.output + self.data) / 2  
+        total = 0
+        temp_list = []
+
+        # 큐 순회하며 합산
+        while not self.queue.empty():
+            item = self.queue.get()
+            total += item
+            temp_list.append(item)
+
+        # 원래 큐 상태로 복구
+        for item in temp_list:
+            self.queue.put(item)
+
+        # 평균 계산
+        self.output = total / len(temp_list)
+        return self.output 
+    
+    def Enqueue(self, data):
+        self.queue.get()
+        self.queue.put(data)
 
 class hands:
-    def __init__(self, cnt = 0, data = 0.0, output = 0.0):
-        self.cnt = cnt
+    def __init__(self, data, queue, output):
         self.data = data
+        self.queue = queue
         self.output = output
     
     def average_output(self):
-        if self.cnt == 1:
-            self.output += self.data 
-        else:
-            self.output = (self.output + self.data) / 2  
+        total = 0
+        temp_list = []
 
+        # 큐 순회하며 합산
+        while not self.queue.empty():
+            item = self.queue.get()
+            total += item
+            temp_list.append(item)
+
+        # 원래 큐 상태로 복구
+        for item in temp_list:
+            self.queue.put(item)
+
+        # 평균 계산
+        self.output = total / len(temp_list)
+        return self.output  
+    
+    def Enqueue(self, data):
+        self.queue.get()
+        self.queue.put(data)
+
+class brightness:
+    def __init__(self, data, queue, output):
+        self.data = data
+        self.queue = queue
+        self.output = output
+    
+    def average_output(self):
+        total = 0
+        temp_list = []
+
+        # 큐 순회하며 합산
+        while not self.queue.empty():
+            item = self.queue.get()
+            total += item
+            temp_list.append(item)
+
+        # 원래 큐 상태로 복구
+        for item in temp_list:
+            self.queue.put(item)
+
+        # 평균 계산
+        self.output = total / len(temp_list)
+        return self.output
+    
+    def Enqueue(self, data):
+        self.queue.get()
+        self.queue.put(data)
+     
 cnt = 0
 
-angle_waist = angle_waist(cnt = 0, data = 0.0, output = 0.0)
-monitor_near = monitor_near(cnt = 0, data = 0.0, output =0.0)
-monitor_far = monitor_far(cnt = 0, data = 0.0, output =0.0)
-turttle_neck = turttle_neck(cnt = 0, data = 0.0, output =0.0)
-hands = hands(cnt = 0, data = 0.0, output =0.0)
+angle_waist = angle_waist(data = 0.0, queue = q_angle_waist, output = 0.0)
+turttle_neck = turttle_neck(data = 0.0, queue = q_tuttle_neck, output = 0.0)
+hands = hands(data = 0.0, queue = q_hands, output = 0.0)
+brightness = brightness(data = 0.0, queue = q_brightness, output = 0.0)
 
 def estimation_pose():
     #기준에 따라 상태 출력
-    list = [0, 0, 0, 0, 0]
+    list = [0, 0, 0, 0]
 
     # 허리 기울임은 비율로 나타내기 어려움(애초에 0도를 정상으로 시작하기 때문 / 0도~4도 정상 / 4 ~ 7도 주의 / 7 ~ 10도 이상 경고 )
-    if abs(angle_waist.data) > 1:
-        angle_waist.cnt += 1
-        angle_waist.average_output()
-        if angle_waist.cnt > 10:
-            list[0] = angle_waist.output # 허리 기울임 정도 list[0]에 저장
-            angle_waist.cnt = 0
-    else:
-        if angle_waist.cnt > 0:
-            list[0] = 0                  # 출력될 리스트의 경우 자세에 문제가 없다면 0 리턴
-            angle_waist.cnt -= 1
+    angle_waist.Enqueue(abs(angle_waist.data))
+    angle_waist.average_output()
+    list[0] = angle_waist.output
+    
 
-    if monitor_near.data < center_shoulder_dist_cho:    # 비교문의 기준으로 들어갈 변수 >>> DB상의 개인별 바른 자세 정보로 바뀌면 됨 이 부분을 파라미터로 받아오면 될 듯!
-        monitor_near.cnt += 1
-        monitor_near.average_output()
-        if monitor_near.cnt > 10:
-            list[1] = (monitor_near.output/center_shoulder_dist_cho - 1.0)*100
-            monitor_near.cnt = 0
-    else:
-        if monitor_near.cnt >= 1:
-            list[1] = 0
-            monitor_near.cnt -= 1
+    # 거북목
+    turttle_neck.Enqueue(turttle_neck.data)
+    turttle_neck.average_output()
+    list[1] = (turttle_neck.output/center_mouth_dist_cho - 1.0)*100
 
-    if monitor_far.data > center_shoulder_dist_cho:
-        monitor_far.cnt += 1
-        monitor_far.average_output()
-        if monitor_far.cnt > 10:
-            list[2] = (1.0 - monitor_far.output/center_shoulder_dist_cho)*100
-            monitor_far.cnt = 0
+    # 턱괴기
+    hands.Enqueue(hands.data)
+    hands.average_output()
+    if hands.output > 5:
+        list[2] = 0
     else:
-        if monitor_far.cnt >= 1:
-            list[2] = 0
-            monitor_far.cnt -= 1    
-
-    if turttle_neck.data < center_mouth_dist_cho:
-        turttle_neck.cnt += 1
-        turttle_neck.average_output()
-        if turttle_neck.cnt > 10:
-            list[3] = (turttle_neck.output/center_mouth_dist_cho - 1.0)*100
-            turttle_neck.cnt = 0
+        list[2] = 1
+        
+    
+    # 밝기
+    brightness.Enqueue(brightness.data)
+    brightness.average_output()
+    if brightness.output > 60:
+        list[3] = 0
     else:
-        if turttle_neck.cnt >= 1:
-            list[3] = 0
-            turttle_neck.cnt -= 1 
-            
-    if hands.data < 4:              # 기준에 들어갈 값은 DB에서 불러올 예정
-        hands.cnt += 1
-        hands.average_output()
-        if hands.cnt > 10:
-            list[4] = hands.output
-            hands.cnt = 0
-    else:
-        if hands.cnt >= 1:
-            list[4] = 0
-            hands.cnt -= 1
-
+        list[3] = 1
+    
     return list
 
 def result_pose(list):
-    i = 1
-
+    # 허리 각도
     if list[0] < 5:
         list[0] = 0
     elif list[0] >= 5 and list[0] < 15:
@@ -149,19 +188,17 @@ def result_pose(list):
     else:
         list[0] = 2
 
-    for i in range(1, len(list)-1):
-        if list[i] < 10:
-            list[i] = 0
-        elif list[i] >= 10 and list[i] < 30:
-            list[i] = 1
-        else:
-            list[i] = 2
-
-    if list[4]:
-        list[4] = 1
+    # 거북목
+    if list[1] < 10:
+        list[1] = 0
+    elif list[1] >= 10 and list[1] < 30:
+        list[1] = 1
     else:
-        list[4] = 0
+        list[1] = 2
 
+    # 턱괴기
+
+    # 밝기
     return list
     
     
@@ -218,27 +255,35 @@ with mp_pose.Pose(
 
                 # 합성 키 포인트
                 angle_shoulder = abs(math.degrees(math.atan(right_shoulder.y - left_shoulder.y)/(right_shoulder.x - left_shoulder.x)))
-                center_shoulder_dist = (left_shoulder.z + right_shoulder.z)/2
                 center_mouth_dist = (left_mouth.z + right_mouth.z)/2
                 left_hand_distance = math.sqrt((left_mouth.x - left_ankle.x)**2 + (left_mouth.y - left_ankle.y)**2 + 10*(left_mouth.z - left_ankle.z)**2)
-                right_hand_distance = math.sqrt((right_mouth.x - right_ankle.x)**2 + (right_mouth.y - right_ankle.y)**2 + 10*(right_mouth.z - right_ankle.z)**2)
+                right_hand_distance = math.sqrt(10*(right_mouth.x - right_ankle.x)**2 + (right_mouth.y - right_ankle.y)**2 + 10*(right_mouth.z - right_ankle.z)**2)
+                
+                print(f"Right hand: (x={right_ankle.x:.4f}, y={right_ankle.y:.4f},  z= {right_ankle.z:.4f}, visibility = {right_ankle.visibility}")
 
                 angle_waist.data = angle_shoulder
-                monitor_near.data = center_shoulder_dist
-                monitor_far.data = center_shoulder_dist
                 turttle_neck.data = center_mouth_dist
-                hands.data = min(left_hand_distance, right_hand_distance) # 여기에 hands visibility를 고려해서 거리 나타내기
+                hands.data = min(left_hand_distance, right_hand_distance)
                 
+                ret, frame = cap.read()
+                if not ret:
+                    ret = 1
+
+                # 그레이스케일로 변환
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                
+                # 밝기 측정 (평균 계산)
+                brightness.data = gray.mean()
+
                 # 개인 별 바른 자세 데이터(어디에 만들지 잘 모르겠어서 일단 여기에 만들었음)
-                center_shoulder_dist_cho = -0.5
                 center_mouth_dist_cho = -1.1
 
                 # 확인용 코드(값 잘 받는지 확인)
-                print(f"hand dist = {hands.data:.4f}")
+                print(f"hand dist = {hands.data}")
                 
                 outputList = result_pose(estimation_pose())
 
-                for i in range(5):
+                for i in range(4):
                     print(outputList[i])
 
 
@@ -248,10 +293,10 @@ with mp_pose.Pose(
             else: 
                 cnt += 1
                 if cnt > 10: # 확인 빠르게 하기 위해 10초로 설정, 추후에 1분으로 고치면 될 듯
-                    print(1)
+                    disappear = 1
                     cnt = 0 # 이 부분 어떻게 처리할 것인지. 확인을 누르면 cnt를 0으로 돌릴지 논의
                 else:
-                    print(0)
+                    disappear = 0
 
 
             # 마지막 출력 시간 갱신
