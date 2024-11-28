@@ -10,6 +10,7 @@ last_time = 0
 cnt = 0
 gray = 0
 complete = 0
+cnt_start = 0
 
 ###########################################################################
 #                   자세             등록                                  #
@@ -42,6 +43,7 @@ pose_list = [0.0, 0.0, 0.0, 0.0, 0.0]       # DB에 저장할 최종 자세 정�
 ###########################################################################
 #                   자세             판단                                  #
 ###########################################################################
+
 q_angle_waist = Queue(maxsize=10)
 q_tuttle_neck = Queue(maxsize=10)
 q_hands       = Queue(maxsize=10)
@@ -58,6 +60,7 @@ q_tuttle_neck = initialize_queue(5, 0)
 q_hands = initialize_queue(5, 0)
 q_brightness = initialize_queue(5, 0)
 
+outputlist = [0, 0, 0, 0]
 
 angle_waist = angle_waist(data = 0.0, queue = q_angle_waist, output = 0.0)
 turttle_neck = turttle_neck(data = 0.0, queue = q_tuttle_neck, output = 0.0)
