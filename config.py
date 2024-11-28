@@ -16,14 +16,19 @@ complete = 0
 ###########################################################################
 
 def average_pose(cnt, data, listData, i):
+
     if cnt < 10:
         listData[i] = listData[i] + data
         return listData[i]
         
-    else:
-        average = listData[i]/10
-        listData[i] = 0.0    
+    else:  
+        if cnt == 10:
+            average = listData[i]/10
+        else:
+            average = listData[i]
+
         return average 
+
 
 def save_pose(cnt, keyPoint_list, pose_list, i):
     for i in range(5):
