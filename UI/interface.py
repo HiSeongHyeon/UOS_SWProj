@@ -154,14 +154,15 @@ def Join_Window(db):
         input_Password = ent_PW.get()
         check_Password = ent_PW_check.get()
 
+        result = db.sign_up(input_ID, input_Password, input_name)
+
         if (len(input_name) == 0 or len(input_ID) == 0 or len(input_Password) == 0 or len(check_Password) == 0):  # 입력하지 않은 경우
             join_error_message.config(text = "    Please enter your information.   ")
         elif (input_Password != check_Password):                                        # PW와 PW check이 다른 경우
             join_error_message.config(text = "     Please check your password.     ")
-        elif (db.sign_up(input_ID, input_Password, input_name) == False):               # DB에 이미 정보가 존재하는 경우
+        elif (result == False):               # DB에 이미 정보가 존재하는 경우
             join_error_message.config(text = "ID, PW already exist or are incorrect")
         else:
-            db.sign_up(input_ID, input_Password, input_name)
             config.flag_win = 3
             join_win.destroy()
     join_error_message.place(x = 125, y = 445)
@@ -295,9 +296,10 @@ def RegiPose_Window(db):
                     config.cnt = 0
                     db.insert_hpe_data(config.pose_list[0], config.pose_list[1], config.pose_list[2])
                     config.complete = 0
+                    config.cnt_start = 0
                     config.flag_win = 4
                     regi_win.destroy()
-                    start_button.place_forget()
+                    
                     
 
                 def reclick():
@@ -305,6 +307,7 @@ def RegiPose_Window(db):
                         config.pose_list[j] = 0.0
                     config.cnt = 0
                     config.complete = 0
+                    config.cnt_start = 1
                     guide_lab.config(text="카메라를 10초간 응시하세요. 사용자 자세 등록을 실행 중 입니다.", fg = "red")
                     guide_lab.place(x = 75, y = 72)
                     start_button.place_forget()
@@ -312,24 +315,26 @@ def RegiPose_Window(db):
                 start_button.config(command=reclick)
                 
 
-                # 확인용 출력 코드(이후 삭제 필요)                
-                if config.cnt > 9: 
-                    guide_lab.config(text = "Restart 버튼을 눌러 재등록하거나 Register 버튼을 눌러 손 정보 등록으로 넘어가세요.", fg = "green")
-                    guide_lab.place(x = 13, y = 72)
+                if config.cnt_start:
+                    # 확인용 출력 코드(이후 삭제 필요)                
+                    if config.cnt > 9: 
+                        guide_lab.config(text = "Restart 버튼을 눌러 재등록하거나 Register 버튼을 눌러 회원가입을 완료하세요.", fg = "green")
+                        guide_lab.place(x = 30, y = 72)
 
-                    print(config.cnt)
-                    for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
-                        print(config.pose_list[j])
-                    config.complete = 1            # UI팀에게 넘겨줄 flag
+                        print(config.cnt)
+                        for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                            print(config.pose_list[j])
+                        config.complete = 1            # UI팀에게 넘겨줄 flag
 
-                if config.complete == 1:
-                    restart_button.config(command=reclick)
-                    restart_button.place(x = 205, y = 485)
-                    
-                    register_button.config(command=click)
-                    register_button.place(x = 205, y = 540)
-                    
-                config.cnt += 1
+                    if config.complete == 1:
+                        restart_button.config(command=reclick)
+                        restart_button.place(x = 205, y = 485)
+                        
+                        register_button.config(command=click)
+                        register_button.place(x = 205, y = 540)
+                        
+                    config.cnt += 1
+
             else:
                # 화면에 keyPoint가 생성되지 않을 경우
                print("화면에 자세가 보이도록 앉아주세요.")
@@ -473,8 +478,8 @@ def RegiHand_Window(db):
                     config.cnt = 0
                     db.insert_hpe_hands_data(config.pose_list[3], config.pose_list[4])
                     config.complete = 0
+                    config.cnt_start = 0
                     config.flag_win = 1
-                    start_button.place_forget()
                     hand_win.destroy()
 
                 def reclick():
@@ -482,6 +487,7 @@ def RegiHand_Window(db):
                         config.pose_list[j] = 0.0
                     config.cnt = 0
                     config.complete = 0
+                    config.cnt_start = 1
                     guide_lab.config(text="10초간 손을 들고 있으세요. 손 정보 등록을 실행 중 입니다.", fg = "red")
                     guide_lab.place(x = 75, y = 72)
                     start_button.place_forget()
@@ -489,24 +495,26 @@ def RegiHand_Window(db):
                 start_button.config(command=reclick)
                 
 
-                # 확인용 출력 코드(이후 삭제 필요)                
-                if config.cnt > 9: 
-                    guide_lab.config(text = "Restart 버튼을 눌러 재등록하거나 Register 버튼을 눌러 회원가입을 완료하세요.", fg = "green")
-                    guide_lab.place(x = 30, y = 72)
+                if config.cnt_start:
+                    # 확인용 출력 코드(이후 삭제 필요)                
+                    if config.cnt > 9: 
+                        guide_lab.config(text = "Restart 버튼을 눌러 재등록하거나 Register 버튼을 눌러 회원가입을 완료하세요.", fg = "green")
+                        guide_lab.place(x = 30, y = 72)
 
-                    print(config.cnt)
-                    for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
-                        print(config.pose_list[j])
-                    config.complete = 1            # UI팀에게 넘겨줄 flag
+                        print(config.cnt)
+                        for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                            print(config.pose_list[j])
+                        config.complete = 1            # UI팀에게 넘겨줄 flag
 
-                if config.complete == 1:
-                    restart_button.config(command=reclick)
-                    restart_button.place(x = 205, y = 485)
+                    if config.complete == 1:
+                        restart_button.config(command=reclick)
+                        restart_button.place(x = 205, y = 485)
+                        
+                        register_button.config(command=click)
+                        register_button.place(x = 205, y = 540)
+                        
+                    config.cnt += 1
                     
-                    register_button.config(command=click)
-                    register_button.place(x = 205, y = 540)
-                    
-                config.cnt += 1
             else:
                # 화면에 keyPoint가 생성되지 않을 경우
                print("화면에 자세가 보이도록 앉아주세요.")
@@ -568,6 +576,7 @@ def Main_Window(db):
 
     # 등록된 자세 정보 조회
     list_from_DB = db.fetch_hpe_data()
+    hpe_data_DB = list_from_DB[0]
 
     # 기본 창 설정
     main_win = Tk()
@@ -731,7 +740,7 @@ def Main_Window(db):
                 config.turttle_neck.data = center_mouth_dist
                 config.hands.data = min(left_hand_distance, right_hand_distance)
                 
-                hand_distance = (list_from_DB[3]+list_from_DB[4])/2
+                hand_distance = (hpe_data_DB[3]+hpe_data_DB[4])/2
                 
 
                 outputList = config.result_pose(config.estimation_pose(hand_distance))   # 파라미터에 center_mouth_dist랑 hand_distance 보내야함!
