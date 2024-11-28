@@ -63,7 +63,7 @@ def Login_Window(db):
 
         # 데이터베이스를 이용해 로그인 확인
         if db.log_in(user_ID, user_PW):
-            config.flag_win = 4
+            config.flag_win = 5
             login_win.destroy()
         else:
             login_error_message.config(text = "Please check your ID or password.")
@@ -118,9 +118,9 @@ def Join_Window(db):
 
     # ID 입력부
     ent_ID = Entry(join_win, font=("맑은고딕", "15", "bold"), width = 23, bg = 'white', border = 0)
-    ent_ID.insert(0, "영문/숫자 12자 이내")
+    ent_ID.insert(0, "영문+숫자 12자 이내")
     def clear1(event):
-        if ent_ID.get() == "영문/숫자 12자 이내":
+        if ent_ID.get() == "영문+숫자 12자 이내":
             ent_ID.delete(0, len(ent_ID.get()))
     ent_ID.bind("<Button-1>", clear1)
     ent_ID.place(x = 157, y = 239)
@@ -128,9 +128,9 @@ def Join_Window(db):
 
     # PW 입력부
     ent_PW = Entry(join_win, font=("맑은고딕", "15", "bold"), width = 23, bg = 'white', border = 0)
-    ent_PW.insert(0, "영문/숫자/문자 12자 이내")
+    ent_PW.insert(0, "영문,숫자,문자 12자 이내")
     def clear2(event):
-        if ent_PW.get() == "영문/숫자/문자 12자 이내":
+        if ent_PW.get() == "영문,숫자,문자 12자 이내":
             ent_PW.delete(0, len(ent_PW.get()))
         else:
             ent_PW.config(show = "*")
@@ -155,16 +155,16 @@ def Join_Window(db):
         check_Password = ent_PW_check.get()
 
         if (len(input_name) == 0 or len(input_ID) == 0 or len(input_Password) == 0 or len(check_Password) == 0):  # 입력하지 않은 경우
-            join_error_message.config(text = "Please enter your information.")
+            join_error_message.config(text = "    Please enter your information.   ")
         elif (input_Password != check_Password):                                        # PW와 PW check이 다른 경우
-            join_error_message.config(text = " Please check your password. ")
+            join_error_message.config(text = "     Please check your password.     ")
         elif (db.sign_up(input_ID, input_Password, input_name) == False):               # DB에 이미 정보가 존재하는 경우
-            join_error_message.config(text = "   ID and PW already exist.  ")
+            join_error_message.config(text = "ID, PW already exist or are incorrect")
         else:
             db.sign_up(input_ID, input_Password, input_name)
             config.flag_win = 3
             join_win.destroy()
-    join_error_message.place(x = 145, y = 445)
+    join_error_message.place(x = 125, y = 445)
     # 다음 버튼
     next_image = PhotoImage(file = "UI/img/next_bt.png")
     next_button = Button(join_win, image = next_image, border = 0, bg = "#CBDAEC")
@@ -194,15 +194,23 @@ def RegiPose_Window(db):
 
     # 안내 메시지
     guide_lab = Label(regi_win, font=("맑은고딕", "12", "bold"), background="#E5EDF5")
-    guide_lab.config(text="카메라를 10초간 응시하세요. 사용자 자세 등록을 실행 중 입니다.", fg = "red")
-    guide_lab.place(x = 75, y = 72)
+    guide_lab.config(text="사용 전 자세 등록을 해야합니다. START 버튼을 눌러주세요", fg = "red")
+    guide_lab.place(x = 82, y = 72)
 
 
     # 등록 완료 버튼 선언만
     register_image = PhotoImage(file = "UI/img/register_bt.png")
     register_button = Button(regi_win, image = register_image, border = 0, bg = "#CBDAEC")
     
-    
+    # 재등록 버튼 선언만
+    restart_image = PhotoImage(file = "UI/img/restart_bt.png")
+    restart_button = Button(regi_win, image = restart_image, border = 0, bg = "#CBDAEC")
+
+    # 등록 시작 버튼 선언만
+    start_image = PhotoImage(file = "UI/img/start_bt.png")
+    start_button = Button(regi_win, image = start_image, border = 0, bg = "#CBDAEC")
+    start_button.place(x = 205, y = 510)
+
     # 카메라 프레임 설정
     frm = Frame(regi_win, width = 520, height = 416)
     frm.place(x = 39, y = 115)
@@ -279,30 +287,47 @@ def RegiPose_Window(db):
 
                 # 자세 등록
                 # 매 초마다 keyPoint_list를 pose_list에 저장(~cnt 9까지), cnt가 10이 되면 기존에 저장해온 값을 평균내서 출력  
-                pose_list = config.save_pose(config.cnt, config.keyPoint_list, config.pose_list, i)
+                config.pose_list = config.save_pose(config.cnt, config.keyPoint_list, config.pose_list, i)
                 
+                def click():
+                    config.count_time = 1
+                    config.last_time = 0
+                    config.cnt = 0
+                    db.insert_hpe_data(config.pose_list[0], config.pose_list[1], config.pose_list[2])
+                    config.complete = 0
+                    config.flag_win = 4
+                    regi_win.destroy()
+                    start_button.place_forget()
+                    
+
+                def reclick():
+                    for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                        config.pose_list[j] = 0.0
+                    config.cnt = 0
+                    config.complete = 0
+                    guide_lab.config(text="카메라를 10초간 응시하세요. 사용자 자세 등록을 실행 중 입니다.", fg = "red")
+                    guide_lab.place(x = 75, y = 72)
+                    start_button.place_forget()
+
+                start_button.config(command=reclick)
+                
+
                 # 확인용 출력 코드(이후 삭제 필요)                
                 if config.cnt > 9: 
-                    config.complete = 1            # UI팀에게 넘겨줄 flag
-                    config.cnt = 0
+                    guide_lab.config(text = "Restart 버튼을 눌러 재등록하거나 Register 버튼을 눌러 손 정보 등록으로 넘어가세요.", fg = "green")
+                    guide_lab.place(x = 13, y = 72)
+
+                    print(config.cnt)
                     for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
-                        print(pose_list[j])
-                    db.insert_hpe_data(pose_list[0], pose_list[1], pose_list[2], pose_list[3], pose_list[4])
-                    # for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
-                    #     pose_list[j] = 0.0
+                        print(config.pose_list[j])
+                    config.complete = 1            # UI팀에게 넘겨줄 flag
 
                 if config.complete == 1:
-                    guide_lab.config(text = "등록이 완료되었습니다. Register 버튼을 눌러 회원가입을 완료하세요.", fg = "green")
-                    guide_lab.place(x = 49, y = 72)
-                    def click():
-                        config.count_time = 1
-                        config.last_time = 0
-                        config.cnt = 0
-                        config.complete = 0
-                        config.flag_win = 1
-                        regi_win.destroy()
+                    restart_button.config(command=reclick)
+                    restart_button.place(x = 205, y = 485)
+                    
                     register_button.config(command=click)
-                    register_button.place(x = 205, y = 510)
+                    register_button.place(x = 205, y = 540)
                     
                 config.cnt += 1
             else:
@@ -321,10 +346,7 @@ def RegiPose_Window(db):
     video_play()
     
 
-    ### 등록이 완료되면 해야 할 코드 ###
-    # guide_lab.config(text = "등록이 완료되었습니다. Register 버튼을 눌러 회원가입을 완료하세요.", fg = "green")
-    # guide_lab.place(x = 49, y = 72)
-    # register_button.place(x = 205, y = 510)
+  
 
 
     # 종료 키 설정 및 창 루프 생성
@@ -333,9 +355,187 @@ def RegiPose_Window(db):
 
 
 
-# 화면 4. 메인 window
-def Main_Window(db):
 
+# 화면 4. 손 정보 등록
+def RegiHand_Window(db):
+
+   # 기본 창 설정
+    hand_win = Tk()
+    hand_win.geometry("600x600+400+80")
+    hand_win.resizable(width=0, height=0)
+    hand_win.title("HPE_Hand_Register")
+    # 기본 창에 들어갈 전체 이미지 설정
+    frame_photo = PhotoImage(file = "UI/img/regi_bg.png")
+    frame_label = Label(hand_win, border = 0, image = frame_photo)
+    frame_label.pack(fill = "both", expand = True)
+
+
+    # 안내 메시지
+    guide_lab = Label(hand_win, font=("맑은고딕", "12", "bold"), background="#E5EDF5")
+    guide_lab.config(text="손 등록을 해야합니다. 손을 들고 START 버튼을 눌러주세요", fg = "red")
+    guide_lab.place(x = 82, y = 72)
+
+
+    # 등록 완료 버튼 선언만
+    register_image = PhotoImage(file = "UI/img/register_bt.png")
+    register_button = Button(hand_win, image = register_image, border = 0, bg = "#CBDAEC")
+    
+    # 재등록 버튼 선언만
+    restart_image = PhotoImage(file = "UI/img/restart_bt.png")
+    restart_button = Button(hand_win, image = restart_image, border = 0, bg = "#CBDAEC")
+
+    # 등록 시작 버튼 선언만
+    start_image = PhotoImage(file = "UI/img/start_bt.png")
+    start_button = Button(hand_win, image = start_image, border = 0, bg = "#CBDAEC")
+    start_button.place(x = 205, y = 510)
+
+    # 카메라 프레임 설정
+    frm = Frame(hand_win, width = 520, height = 416)
+    frm.place(x = 39, y = 115)
+    lbl_video = Label(frm)
+    lbl_video.pack()
+    
+    # mediapipe & camera 켜기
+    cap = cv2.VideoCapture(0)
+    mp_drawing = mp.solutions.drawing_utils
+    mp_pose = mp.solutions.pose
+
+    # 이후 판단을 위해 초깃값 생성
+    Initial_last_time = time.time()
+    Initial_cnt = 0
+
+    def video_play():
+
+        if config.count_time == 1:
+            config.last_time = Initial_last_time
+            config.cnt = Initial_cnt
+            config.count_time += 1
+
+        success, image = cap.read()
+        if not success:
+            print("카메라 없음")
+            return
+        
+
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = cv2.flip(image, 1)
+        image = cv2.resize(image, (520, 360))
+
+        with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+            results = pose.process(image)
+
+            if results.pose_landmarks:
+                mp_drawing.draw_landmarks(
+                    image,
+                    results.pose_landmarks,
+                    mp_pose.POSE_CONNECTIONS,
+                    landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2)
+                )
+        
+        current_time = time.time()
+        if current_time - config.last_time >= 1.0:
+
+            # [[틀린 기준 판단]] HPE를 성공한다면 출력 - README 파일의 키포인트 넘버 확인
+            if results.pose_landmarks:
+                # left shoulder (index 11), right shoulder (index 12)
+                # 단일 키 포인트
+                left_shoulder = results.pose_landmarks.landmark[11]
+                right_shoulder = results.pose_landmarks.landmark[12]
+                left_mouth = results.pose_landmarks.landmark[9]
+                right_mouth = results.pose_landmarks.landmark[10]
+                left_ankle = results.pose_landmarks.landmark[28]
+                right_ankle = results.pose_landmarks.landmark[29]
+
+                # angle_shoulder 
+                config.keyPoint_list[0] = abs(math.degrees(math.atan(right_shoulder.y - left_shoulder.y)/(right_shoulder.x - left_shoulder.x)))
+                
+                # center_shoulder_dist 
+                config.keyPoint_list[1] = (left_shoulder.z + right_shoulder.z)/2
+                
+                # center_mouth_dist 
+                config.keyPoint_list[2] = (left_mouth.z + right_mouth.z)/2
+                
+                # left_hand_distance 
+                config.keyPoint_list[3] = math.sqrt(10*(left_mouth.x - left_ankle.x)**2 + (left_mouth.y - left_ankle.y)**2 + 10*(left_mouth.z - left_ankle.z)**2)
+                
+                # right_hand_distance 
+                config.keyPoint_list[4] = math.sqrt(10*(right_mouth.x - right_ankle.x)**2 + (right_mouth.y - right_ankle.y)**2 + 10*(right_mouth.z - right_ankle.z)**2)
+                
+                i=0
+
+                # 자세 등록
+                # 매 초마다 keyPoint_list를 pose_list에 저장(~cnt 9까지), cnt가 10이 되면 기존에 저장해온 값을 평균내서 출력  
+                config.pose_list = config.save_pose(config.cnt, config.keyPoint_list, config.pose_list, i)
+                
+                def click():
+                    config.count_time = 1
+                    config.last_time = 0
+                    config.cnt = 0
+                    db.insert_hpe_hands_data(config.pose_list[3], config.pose_list[4])
+                    config.complete = 0
+                    config.flag_win = 1
+                    start_button.place_forget()
+                    hand_win.destroy()
+
+                def reclick():
+                    for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                        config.pose_list[j] = 0.0
+                    config.cnt = 0
+                    config.complete = 0
+                    guide_lab.config(text="10초간 손을 들고 있으세요. 손 정보 등록을 실행 중 입니다.", fg = "red")
+                    guide_lab.place(x = 75, y = 72)
+                    start_button.place_forget()
+
+                start_button.config(command=reclick)
+                
+
+                # 확인용 출력 코드(이후 삭제 필요)                
+                if config.cnt > 9: 
+                    guide_lab.config(text = "Restart 버튼을 눌러 재등록하거나 Register 버튼을 눌러 회원가입을 완료하세요.", fg = "green")
+                    guide_lab.place(x = 30, y = 72)
+
+                    print(config.cnt)
+                    for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                        print(config.pose_list[j])
+                    config.complete = 1            # UI팀에게 넘겨줄 flag
+
+                if config.complete == 1:
+                    restart_button.config(command=reclick)
+                    restart_button.place(x = 205, y = 485)
+                    
+                    register_button.config(command=click)
+                    register_button.place(x = 205, y = 540)
+                    
+                config.cnt += 1
+            else:
+               # 화면에 keyPoint가 생성되지 않을 경우
+               print("화면에 자세가 보이도록 앉아주세요.")
+
+            # 마지막 출력 시간 갱신
+            config.last_time = current_time
+        
+        img = Image.fromarray(image)
+        imgtk = ImageTk.PhotoImage(image=img)
+        lbl_video.imgtk = imgtk
+        lbl_video.configure(image=imgtk)
+        lbl_video.after(10, video_play)
+
+    video_play()
+    
+  
+
+    # 종료 키 설정 및 창 루프 생성
+    hand_win.protocol("WM_DELETE_WINDOW", quit)
+    hand_win.mainloop()
+
+
+
+
+
+
+# 화면 5. 메인 window
+def Main_Window(db):
+    
     # 백그라운드 화면
     def on_minimize(event=None):
         new_win = Toplevel()  # 새 창을 Toplevel로 생성
@@ -386,7 +586,7 @@ def Main_Window(db):
     frame_alarm = Frame(main_win, bg = "white", width=750, height=50)
     frame_alarm.place(x=480, y=53)
     lbl_alarm = Label(frame_alarm, font = ("맑은고딕", "20", "bold"), background= "white")
-    user_name = "최성현"        # db에서 이름 가져오기
+    user_name = db.get_name()    # db에서 이름 가져오기
     lbl_alarm.config(text = (user_name+ "  |  최근 알림: 알림 없음"))
     lbl_alarm.place(x=10, y=7)
 
@@ -415,41 +615,41 @@ def Main_Window(db):
 
     # 알림 이미지 기본값
     # 어깨
-    img1_1 = PhotoImage(file="UI/image/scoliosis_good.png", master=main_win)      # 0단계(good)
-    img1_2 = PhotoImage(file="UI/image/scoliosis_caution.png", master=main_win)    # 1단계
-    img1_3 = PhotoImage(file="UI/image/scoliosis_warning.png", master=main_win)    # 2단계(bad)
+    img1_1 = PhotoImage(file="UI/img/scoliosis_good.png", master=main_win)      # 0단계(good)
+    img1_2 = PhotoImage(file="UI/img/scoliosis_caution.png", master=main_win)    # 1단계
+    img1_3 = PhotoImage(file="UI/img/scoliosis_warning.png", master=main_win)    # 2단계(bad)
     img1_1 = img1_1.subsample(7)
-    img1_2 = img1_2.subsample(5)
-    img1_3 = img1_3.subsample(3)
+    img1_2 = img1_2.subsample(7)
+    img1_3 = img1_3.subsample(7)
     lbl_img1 = Label(main_win)
     lbl_img1.config(image=img1_1, background = "#CBDAEC")
     lbl_img1.place(x=750, y=170)
 
     # 거북목
-    img2_1 = PhotoImage(file="UI/image/forward_head_good.png", master=main_win)
-    img2_2 = PhotoImage(file="UI/image/forward_head_caution.png", master=main_win)
-    img2_3 = PhotoImage(file="UI/image/forward_head_warning.png", master=main_win)
+    img2_1 = PhotoImage(file="UI/img/forward_head_good.png", master=main_win)
+    img2_2 = PhotoImage(file="UI/img/forward_head_caution.png", master=main_win)
+    img2_3 = PhotoImage(file="UI/img/forward_head_warning.png", master=main_win)
     img2_1 = img2_1.subsample(7)
-    img2_2 = img2_2.subsample(5)
-    img2_3 = img2_3.subsample(3)
+    img2_2 = img2_2.subsample(7)
+    img2_3 = img2_3.subsample(7)
     lbl_img2 = Label(main_win)
     lbl_img2.config(image=img2_1, background = "#CBDAEC")
     lbl_img2.place(x=1000, y=170)
 
     # 턱괴기
-    img3_1 = PhotoImage(file="UI/image/chin_hold_good.png", master=main_win)
-    img3_2 = PhotoImage(file="UI/image/chin_hold_warning.png", master=main_win)
-    img3_1 = img3_1.subsample(5)
-    img3_2 = img3_2.subsample(5)
+    img3_1 = PhotoImage(file="UI/img/chin_hold_good.png", master=main_win)
+    img3_2 = PhotoImage(file="UI/img/chin_hold_warning.png", master=main_win)
+    img3_1 = img3_1.subsample(7)
+    img3_2 = img3_2.subsample(7)
     lbl_img3 = Label(main_win)
     lbl_img3.config(image=img3_1, background = "#B0C6E1")
     lbl_img3.place(x=750, y=420)
 
     # 환경 밝기
-    img4_1 = PhotoImage(file="UI/image/brightness_good.png", master=main_win)
-    img4_2 = PhotoImage(file="UI/image/brightness_warning.png", master=main_win)
-    img4_1 = img4_1.subsample(5)
-    img4_2 = img4_2.subsample(5)
+    img4_1 = PhotoImage(file="UI/img/brightness_good.png", master=main_win)
+    img4_2 = PhotoImage(file="UI/img/brightness_warning.png", master=main_win)
+    img4_1 = img4_1.subsample(7)
+    img4_2 = img4_2.subsample(7)
     lbl_img4 = Label(main_win)
     lbl_img4.config(image=img4_1, background = "#B0C6E1")
     lbl_img4.place(x=1000, y=420)
@@ -530,10 +730,11 @@ def Main_Window(db):
                 config.angle_waist.data = angle_shoulder
                 config.turttle_neck.data = center_mouth_dist
                 config.hands.data = min(left_hand_distance, right_hand_distance)
-                                
+                
+                hand_distance = (list_from_DB[3]+list_from_DB[4])/2
                 
 
-                outputList = config.result_pose(config.estimation_pose(list_from_DB[4]))
+                outputList = config.result_pose(config.estimation_pose(hand_distance))   # 파라미터에 center_mouth_dist랑 hand_distance 보내야함!
                 # 어깨 판단 
                 if outputList[0] == 1:
                     lbl_img1.config(image=img1_2, background = "#CBDAEC")
@@ -601,3 +802,4 @@ def Main_Window(db):
     # 종료 키 설정 및 창 루프 생성
     main_win.protocol("WM_DELETE_WINDOW", quit)
     main_win.mainloop()
+
