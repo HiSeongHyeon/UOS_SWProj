@@ -1,5 +1,6 @@
 import sqlite3
 from typing import List, Tuple, Optional
+import re
 
 class Database:
     def __init__(self, db_name: str = "Database.db"):
@@ -32,34 +33,29 @@ class Database:
         """)
         self.conn.commit()
 
-    # 
-import re
+    def sign_up(self, ID: str, PW: str, name: str) -> bool:
+        try:
+            if not re.fullmatch(r"(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]{1,12}", ID):
+                raise ValueError("ID는 영문, 숫자가 모두 포함된 1~12자 이내여야 합니다.")
+            
+            if not re.fullmatch(r"(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+=-])[A-Za-z0-9!@#$%^&*()_+=-]{1,12}", PW):
+                raise ValueError("PW는 영문, 숫자, 특수문자가 모두 포함된 1~12자 이내여야 합니다.")
 
-def sign_up(self, ID: str, PW: str, name: str) -> bool:
-    try:
-        if not re.fullmatch(r"(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]{1,12}", ID):
-            raise ValueError("ID는 영문, 숫자가 모두 포함된 1~12자 이내여야 합니다.")
-        
-        if not re.fullmatch(r"(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+=-])[A-Za-z0-9!@#$%^&*()_+=-]{1,12}", PW):
-            raise ValueError("PW는 영문, 숫자, 특수문자가 모두 포함된 1~12자 이내여야 합니다.")
+            # 이름 조건 추가
+            if not re.fullmatch(r"[가-힣A-Za-z0-9]{1,6}", name):
+                raise ValueError("이름은 한글, 영문, 숫자로 이루어진 1~6자 이내여야 합니다.")
 
-        # 이름 조건 추가
-        if not re.fullmatch(r"[가-힣A-Za-z0-9]{1,6}", name):
-            raise ValueError("이름은 한글, 영문, 숫자로 이루어진 1~6자 이내여야 합니다.")
+            # 데이터베이스 삽입
+            self.cur.execute(
+                "INSERT INTO Database_data (ID, PW, Name) VALUES (?, ?, ?)",
+                (ID, PW, name)
+            )
+            self.conn.commit()
+            return True
 
-        # 데이터베이스 삽입
-        self.cur.execute(
-            "INSERT INTO Database_data (ID, PW, Name) VALUES (?, ?, ?)",
-            (ID, PW, name)
-        )
-        self.conn.commit()
-        return True
-
-    except (sqlite3.IntegrityError, ValueError) as e:
-        print(f"회원가입 실패: {e}")
-        return False
-
-
+        except (sqlite3.IntegrityError, ValueError) as e:
+            print(f"회원가입 실패: {e}")
+            return False
 
     def log_in(self, ID: str, PW: str) -> bool:
         self.cur.execute(
