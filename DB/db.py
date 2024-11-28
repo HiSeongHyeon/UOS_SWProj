@@ -36,26 +36,18 @@ class Database:
 import re
 
 def sign_up(self, ID: str, PW: str, name: str) -> bool:
-    """
-    회원가입 메소드 - Database_data 테이블에 ID, PW, 이름 추가.
-    입력 조건을 만족하지 않으면 False를 반환.
-    :param ID: 사용자 ID (영문, 숫자 조합, 1~12자)
-    :param PW: 사용자 PW (영문, 숫자, 특수문자 조합, 1~12자)
-    :param name: 사용자 이름 (한글, 영문, 숫자 조합, 1~6자)
-    :return: 성공 여부
-    """
     try:
-        # 조건 검증
-        if not re.fullmatch(r"[A-Za-z0-9]{1,12}", ID):
-            raise ValueError("ID는 영문, 숫자의 조합으로 1~12자 이내여야 합니다.")
+        if not re.fullmatch(r"(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]{1,12}", ID):
+            raise ValueError("ID는 영문, 숫자가 모두 포함된 1~12자 이내여야 합니다.")
         
-        if not re.fullmatch(r"[A-Za-z0-9!@#$%^&*()_+=-]{1,12}", PW):
-            raise ValueError("PW는 영문, 숫자, 특수문자의 조합으로 1~12자 이내여야 합니다.")
-        
-        if not re.fullmatch(r"[가-힣A-Za-z0-9]{1,6}", name):
-            raise ValueError("이름은 한글, 영문, 숫자의 조합으로 1~6자 이내여야 합니다.")
+        if not re.fullmatch(r"(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+=-])[A-Za-z0-9!@#$%^&*()_+=-]{1,12}", PW):
+            raise ValueError("PW는 영문, 숫자, 특수문자가 모두 포함된 1~12자 이내여야 합니다.")
 
-        # 조건을 만족하면 데이터베이스에 삽입
+        # 이름 조건 추가
+        if not re.fullmatch(r"[가-힣A-Za-z0-9]{1,6}", name):
+            raise ValueError("이름은 한글, 영문, 숫자로 이루어진 1~6자 이내여야 합니다.")
+
+        # 데이터베이스 삽입
         self.cur.execute(
             "INSERT INTO Database_data (ID, PW, Name) VALUES (?, ?, ?)",
             (ID, PW, name)
@@ -64,7 +56,9 @@ def sign_up(self, ID: str, PW: str, name: str) -> bool:
         return True
 
     except (sqlite3.IntegrityError, ValueError) as e:
+        print(f"회원가입 실패: {e}")
         return False
+
 
 
     def log_in(self, ID: str, PW: str) -> bool:
