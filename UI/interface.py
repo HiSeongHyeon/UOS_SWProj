@@ -63,8 +63,16 @@ def Login_Window(db):
 
         # 데이터베이스를 이용해 로그인 확인
         if db.log_in(user_ID, user_PW):
-            config.flag_win = 5
-            login_win.destroy()
+
+            db.cur.execute("SELECT COUNT(*) FROM HPE WHERE ID=? AND PW=?", (user_ID, user_PW))
+            hpe_count = db.cur.fetchone()[0]
+
+            if hpe_count == 0:
+                config.flag_win = 3
+                login_win.destroy()
+            else:
+                config.flag_win = 5
+                login_win.destroy()
         else:
             login_error_message.config(text = "Please check your ID or password.")
     login_error_message.place(x = 655, y = 320)
@@ -163,7 +171,7 @@ def Join_Window(db):
         elif (result == False):               # DB에 이미 정보가 존재하는 경우
             join_error_message.config(text = "ID, PW already exist or are incorrect")
         else:
-            config.flag_win = 3
+            config.flag_win = 1
             join_win.destroy()
     join_error_message.place(x = 125, y = 445)
     # 다음 버튼
@@ -302,7 +310,7 @@ def RegiPose_Window(db):
                     
                     
 
-                def reclick():
+                def start_reclick():
                     for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
                         config.pose_list[j] = 0.0
                     config.cnt = 0
@@ -312,7 +320,7 @@ def RegiPose_Window(db):
                     guide_lab.place(x = 75, y = 72)
                     start_button.place_forget()
 
-                start_button.config(command=reclick)
+                start_button.config(command=start_reclick)
                 
 
                 if config.cnt_start:
@@ -325,6 +333,16 @@ def RegiPose_Window(db):
                         for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
                             print(config.pose_list[j])
                         config.complete = 1            # UI팀에게 넘겨줄 flag
+
+                    def reclick():
+                        for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                            config.pose_list[j] = 0.0
+                        config.cnt = 0
+                        config.complete = 0
+                        config.cnt_start = 1
+                        guide_lab.config(text="10초간 손을 들고 있으세요. 손 정보 등록을 실행 중 입니다.", fg = "red")
+                        guide_lab.place(x = 75, y = 72)
+                        register_button.place_forget()
 
                     if config.complete == 1:
                         restart_button.config(command=reclick)
@@ -479,10 +497,10 @@ def RegiHand_Window(db):
                     db.insert_hpe_hands_data(config.pose_list[3], config.pose_list[4])
                     config.complete = 0
                     config.cnt_start = 0
-                    config.flag_win = 1
+                    config.flag_win = 5
                     hand_win.destroy()
 
-                def reclick():
+                def start_reclick():
                     for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
                         config.pose_list[j] = 0.0
                     config.cnt = 0
@@ -492,7 +510,7 @@ def RegiHand_Window(db):
                     guide_lab.place(x = 75, y = 72)
                     start_button.place_forget()
 
-                start_button.config(command=reclick)
+                start_button.config(command=start_reclick)
                 
 
                 if config.cnt_start:
@@ -505,6 +523,16 @@ def RegiHand_Window(db):
                         for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
                             print(config.pose_list[j])
                         config.complete = 1            # UI팀에게 넘겨줄 flag
+
+                    def reclick():
+                        for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                            config.pose_list[j] = 0.0
+                        config.cnt = 0
+                        config.complete = 0
+                        config.cnt_start = 1
+                        guide_lab.config(text="10초간 손을 들고 있으세요. 손 정보 등록을 실행 중 입니다.", fg = "red")
+                        guide_lab.place(x = 75, y = 72)
+                        register_button.place_forget()
 
                     if config.complete == 1:
                         restart_button.config(command=reclick)
@@ -618,6 +646,7 @@ def Main_Window(db):
     c1.place(x=545, y=670)
 
 
+
     # 이후 판단을 위해 초깃값 생성
     Initial_cnt = 0
     Initial_last_time = time.time()
@@ -679,6 +708,26 @@ def Main_Window(db):
     logout_button.config(command=logout)
     logout_button.place(x = 1240, y = 680)
 
+
+    #내부 함수: 자세 및 손 재등록 하기 위한 함수
+    def go_to_regi():
+        # 전역함수 초기화
+        config.flag_win = 3
+        config.count_time = 1
+        config.disappear = 0
+        config.last_time = 0
+        config.cnt = 0
+        config.complete = 0
+        config.cnt_start = 0
+        # 기존 DB 정보들 지우기
+        db.delete_hpe_data()
+        main_win.destroy() 
+
+    # 재등록 버튼
+    go_to_regi_image = PhotoImage(file = "UI/img/go_to_regi.png")
+    go_to_regi_button = Button(main_win, image = go_to_regi_image, border = 0, bg = "#C2D6E9")
+    go_to_regi_button.config(command=go_to_regi)
+    go_to_regi_button.place(x = 1200, y = 680)
 
     # 영상 재생 및 판단하여 알리는 함수
     def video_play():
@@ -743,37 +792,37 @@ def Main_Window(db):
                 hand_distance = (hpe_data_DB[3]+hpe_data_DB[4])/2
                 
 
-                outputList = config.result_pose(config.estimation_pose(hand_distance))   # 파라미터에 center_mouth_dist랑 hand_distance 보내야함!
+                config.outputList = config.result_pose(config.estimation_pose(hand_distance))   # 파라미터에 center_mouth_dist랑 hand_distance 보내야함!
                 # 어깨 판단 
-                if outputList[0] == 1:
+                if config.outputList[0] == 1:
                     lbl_img1.config(image=img1_2, background = "#CBDAEC")
-                elif outputList[0] == 2:
+                elif config.outputList[0] == 2:
                     lbl_img1.config(image=img1_3, background = "#CBDAEC")
                 else:
                     lbl_img1.config(image=img1_1, background = "#CBDAEC")
 
                 # 거북목 판단
-                if outputList[1] == 1:
+                if config.outputList[1] == 1:
                     lbl_img2.config(image=img2_2, background = "#CBDAEC")
-                elif outputList[1] == 2:
+                elif config.outputList[1] == 2:
                     lbl_img2.config(image=img2_3, background = "#CBDAEC")
                 else:
                     lbl_img2.config(image=img2_1, background = "#CBDAEC")
 
                 # 턱괴기 판단
-                if outputList[2] == 1:
+                if config.outputList[2] == 1:
                     lbl_img3.config(image=img3_2, background = "#B0C6E1")
                 else:
                     lbl_img3.config(image=img3_1, background = "#B0C6E1")
 
                 # 환경밝기 판단
-                if outputList[3] == 1:
+                if config.outputList[3] == 1:
                     lbl_img4.config(image=img4_2, background = "#B0C6E1")
                 else:
                     lbl_img4.config(image=img4_1, background = "#B0C6E1")
 
                 # 메시지 변경
-                if (outputList[0] != 0 or outputList[1] != 0 or outputList[2] != 0 or outputList[3] != 0): 
+                if (config.outputList[0] != 0 or config.outputList[1] != 0 or config.outputList[2] != 0 or config.outputList[3] != 0): 
                     lbl_alarm.config(text = (user_name + "  |  최근 알림: 자세가 불량합니다. 고쳐주세요."), fg = "red")
                 else:
                     lbl_alarm.config(text = (user_name + "  |  최근 알림: 자세 알림이 없습니다."))
@@ -781,7 +830,7 @@ def Main_Window(db):
                 print(config.brightness.output)
 
                 for i in range(4):
-                    print(outputList[i])
+                    print(config.outputList[i])
 
 
                 #print(f"cnt = {angle_waist.cnt:.4f}")
