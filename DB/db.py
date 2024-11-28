@@ -3,20 +3,12 @@ from typing import List, Tuple, Optional
 
 class Database:
     def __init__(self, db_name: str = "Database.db"):
-        """
-        Database 클래스 초기화 및 연결.
-        :param db_name: 데이터베이스 파일 이름
-        """
         self.db_name = db_name
         self.conn = sqlite3.connect(self.db_name)
         self.cur = self.conn.cursor()
         self.current_user: Optional[Tuple[str, str]] = None  # 로그인된 사용자 정보 저장 (ID, PW)
 
     def create_tables(self):
-        """
-        테이블 생성: Database_data 및 HPE 테이블
-        """
-        # Database_data 테이블 생성
         self.cur.execute("""
         CREATE TABLE IF NOT EXISTS Database_data(
             ID TEXT,
@@ -26,7 +18,6 @@ class Database:
         )
         """)
 
-        # HPE 테이블 생성
         self.cur.execute("""
         CREATE TABLE IF NOT EXISTS HPE(
             ID TEXT,
@@ -42,13 +33,6 @@ class Database:
         self.conn.commit()
 
     def sign_up(self, ID: str, PW: str, name: str) -> bool:
-        """
-        회원가입 메소드 - Database_data 테이블에 ID, PW, 이름 추가.
-        :param ID: 사용자 ID
-        :param PW: 사용자 PW
-        :param name: 사용자 이름
-        :return: 성공 여부
-        """
         try:
             self.cur.execute(
                 "INSERT INTO Database_data (ID, PW, Name) VALUES (?, ?, ?)",
@@ -57,43 +41,27 @@ class Database:
             self.conn.commit()
             return True
         except sqlite3.IntegrityError:
-            # print("이미 존재하는 ID와 PW 조합입니다.")
             return False
 
     def log_in(self, ID: str, PW: str) -> bool:
-        """
-        로그인 메소드 - Database_data 테이블의 ID와 PW 비교.
-        로그인 성공 시 current_user에 정보 저장.
-        :param ID: 사용자 ID
-        :param PW: 사용자 PW
-        :return: 로그인 성공 여부
-        """
         self.cur.execute(
             "SELECT * FROM Database_data WHERE ID=? AND PW=?",
             (ID, PW)
         )
         user = self.cur.fetchone()
         if user:
-            self.current_user = (ID, PW)  # 로그인 성공 시 현재 사용자 정보 저장
-            return True # print(f"로그인 성공: ID={ID}")
+            self.current_user = (ID, PW)
+            return True
         else:
             self.current_user = None
-            return False # print("로그인 실패: 잘못된 ID 또는 PW입니다.")
+            return False
 
     def insert_hpe_data(self, 
                         angle_shoulder: float, 
                         center_shoulder_dist: float, 
-                        center_mouth_dist: float, 
-                        left_hand_distance: float, 
-                        right_hand_distance: float) -> bool:
+                        center_mouth_dist: float) -> bool:
         """
-        로그인된 사용자의 HPE 데이터를 삽입.
-        :param angle_shoulder: 어깨 각도
-        :param center_shoulder_dist: 중앙 어깨 거리
-        :param center_mouth_dist: 중앙 입 거리
-        :param left_hand_distance: 왼손 거리
-        :param right_hand_distance: 오른손 거리
-        :return: 삽입 성공 여부
+        left_hand_distance와 right_hand_distance를 제외한 데이터를 삽입
         """
         if not self.current_user:
             print("HPE 데이터를 삽입하려면 먼저 로그인해야 합니다.")
@@ -102,9 +70,9 @@ class Database:
         ID, PW = self.current_user
         try:
             self.cur.execute(
-                """INSERT INTO HPE (ID, PW, angle_shoulder, center_shoulder_dist, center_mouth_dist, left_hand_distance, right_hand_distance) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (ID, PW, angle_shoulder, center_shoulder_dist, center_mouth_dist, left_hand_distance, right_hand_distance)
+                """INSERT INTO HPE (ID, PW, angle_shoulder, center_shoulder_dist, center_mouth_dist) 
+                VALUES (?, ?, ?, ?, ?)""",
+                (ID, PW, angle_shoulder, center_shoulder_dist, center_mouth_dist)
             )
             self.conn.commit()
             print(f"HPE 데이터 삽입 성공: ID={ID}")
@@ -113,11 +81,56 @@ class Database:
             print(f"HPE 데이터 삽입 중 오류 발생: {e}")
             return False
 
+    def insert_hpe_hands_data(self, 
+                              left_hand_distance: float, 
+                              right_hand_distance: float) -> bool:
+        """
+        left_hand_distance와 right_hand_distance 데이터를 삽입
+        """
+        if not self.current_user:
+            print("HPE 데이터를 삽입하려면 먼저 로그인해야 합니다.")
+            return False
+
+        ID, PW = self.current_user
+        try:
+            self.cur.execute(
+                """UPDATE HPE 
+                SET left_hand_distance=?, right_hand_distance=? 
+                WHERE ID=? AND PW=?""",
+                (left_hand_distance, right_hand_distance, ID, PW)
+            )
+            self.conn.commit()
+            if self.cur.rowcount > 0:
+                print(f"손 데이터 삽입 성공: ID={ID}")
+                return True
+            else:
+                print("HPE 데이터가 존재하지 않습니다. 먼저 다른 데이터를 삽입하세요.")
+                return False
+        except sqlite3.Error as e:
+            print(f"손 데이터 삽입 중 오류 발생: {e}")
+            return False
+
+    def get_name(self) -> Optional[str]:
+        """
+        현재 로그인된 사용자의 이름을 반환
+        """
+        if not self.current_user:
+            print("사용자의 이름을 가져오려면 먼저 로그인해야 합니다.")
+            return None
+
+        ID, PW = self.current_user
+        self.cur.execute(
+            "SELECT Name FROM Database_data WHERE ID=? AND PW=?",
+            (ID, PW)
+        )
+        result = self.cur.fetchone()
+        if result:
+            return result[0]
+        else:
+            print("사용자 이름을 찾을 수 없습니다.")
+            return None
+
     def fetch_hpe_data(self) -> Optional[List[Tuple]]:
-        """
-        로그인된 사용자의 HPE 데이터를 조회.
-        :return: HPE 테이블의 데이터 리스트 또는 None
-        """
         if not self.current_user:
             print("HPE 데이터를 조회하려면 먼저 로그인해야 합니다.")
             return None
@@ -131,9 +144,6 @@ class Database:
         return self.cur.fetchall()
 
     def fetch_all_tables(self) -> None:
-        """
-        Database_data와 HPE 테이블의 모든 데이터를 출력.
-        """
         print("\n=== Database_data 테이블 데이터 ===")
         self.cur.execute("SELECT * FROM Database_data")
         database_data = self.cur.fetchall()
@@ -147,10 +157,6 @@ class Database:
             print(record)
 
     def delete_hpe_data(self) -> bool:
-        """
-        로그인된 사용자의 HPE 데이터를 삭제.
-        :return: 삭제 성공 여부
-        """
         if not self.current_user:
             print("HPE 데이터를 삭제하려면 먼저 로그인해야 합니다.")
             return False
@@ -173,7 +179,18 @@ class Database:
             return False
 
     def close_connection(self):
-        """
-        데이터베이스 연결 닫기.
-        """
         self.conn.close()
+
+"""
+db.fetch_hpe_data를 통해 특정 값 (center_shoulder_dist) 가져오기
+
+hpe_data = db.fetch_hpe_data()
+
+if hpe_data and len(hpe_data) > 0:  # 데이터가 존재하는지 확인
+    first_row = hpe_data[0]  # 첫 번째 행 가져오기
+    center_shoulder_dist = first_row[1]  # center_shoulder_dist 값 (인덱스 1)
+    print(f"첫 번째 행의 center_shoulder_dist: {center_shoulder_dist}")
+else:
+    print("HPE 데이터가 없습니다.")
+
+"""
