@@ -86,7 +86,7 @@ def Login_Window(db):
 
     # 엔터키 설정
     login_win.bind("<Return>", lambda event: login())
-    
+
     # 내부 함수 2. join: 가입 버튼을 누르면 회원가입 창으로 바꿈
     def join():
         config.flag_win = 2
@@ -190,7 +190,7 @@ def Join_Window(db):
 
     # 엔터키 설정
     join_win.bind("<Return>", lambda event: click())
-    
+
     # 종료 키 설정 및 창 루프 생성
     join_win.protocol("WM_DELETE_WINDOW", quit)
     join_win.mainloop()
@@ -584,15 +584,33 @@ def Main_Window(db):
     
     # 백그라운드 화면
     def on_minimize(event=None):
+        main_win.withdraw()
+        # 메인 윈도우가 최소화될 때 새로운 창 생성 및 활성화
+        mini_win_activate()
+
+    def mini_win_activate(event=None):
         new_win = Toplevel()  # 새 창을 Toplevel로 생성
-        new_win.title("백그라운드 알림")
+        new_win.overrideredirect(True)
+        new_win.config(background="azure")
+
         def slide(_):
-            new_win.attributes('-alpha',slide_bar.get())
-            slide_label.config(text=str(round(slide_bar.get(),2)))
-        slide_label=Label(new_win,text="투명도 설정")
+            new_win.attributes('-alpha', slide_bar.get())
+            slide_label.config(text=str(round(slide_bar.get(), 2)))
+        def destroy_win():
+            new_win.destroy()
+            main_win.deiconify()
+        style = ttk.Style()
+        style.configure("TScale", background="azure")  # 슬라이더 배경색 변경
+
+        global close
+        close = PhotoImage(file="UI/img/close.png",master=new_win)
+        btn=Button(new_win, image=close, border=0, bg = "azure")
+        btn.config(command=destroy_win)
+        btn.place(x=228,y=0)
+        slide_label = Label(new_win, text="투명도 설정",background="azure")
         slide_label.pack(side="bottom")
-        slide_bar=ttk.Scale(new_win, from_=0.1, to=1.0 ,value=1,orient=HORIZONTAL,command=slide,length=200)
-        slide_bar.pack(side="bottom")
+        slide_bar = ttk.Scale(new_win, from_=0.1, to=1.0, value=1, orient=HORIZONTAL, command=slide, length=200,style="TScale")
+        slide_bar.pack(side="bottom",pady=2)
 
         # 새 창의 크기 설정
         win_width = 250
@@ -610,7 +628,65 @@ def Main_Window(db):
         new_win.attributes('-topmost', True)
         new_win.attributes('-alpha', 1)
 
-        new_win.mainloop()
+        # 이미지 설정
+        mini1_1 = PhotoImage(file="UI/img/spine1.png", master=new_win)
+        mini1_2 = PhotoImage(file="UI/img/spine2.png", master=new_win)
+        mini1_3 = PhotoImage(file="UI/img/spine3.png", master=new_win)
+        mini2_1 = PhotoImage(file="UI/img/neck1.png", master=new_win)
+        mini2_2 = PhotoImage(file="UI/img/neck2.png", master=new_win)
+        mini2_3 = PhotoImage(file="UI/img/neck3.png", master=new_win)
+        mini3_1 = PhotoImage(file="UI/img/chin1.png", master=new_win)
+        mini3_2 = PhotoImage(file="UI/img/chin2.png", master=new_win)
+        mini4_1 = PhotoImage(file="UI/img/bright1.png", master=new_win)
+        mini4_2 = PhotoImage(file="UI/img/bright2.png", master=new_win)
+
+        lab_img1 = Label(new_win)
+        lab_img1.config(image=mini1_1, background="azure")
+        lab_img1.place(x=10,y=45)
+        lab_img2 = Label(new_win)
+        lab_img2.config(image=mini2_1, background="azure")
+        lab_img2.place(x=70,y=45)
+        lab_img3 = Label(new_win)
+        lab_img3.config(image=mini3_1, background="azure")
+        lab_img3.place(x=130,y=45)
+        lab_img4 = Label(new_win)
+        lab_img4.config(image=mini4_1, background="azure")
+        lab_img4.place(x=190,y=45)
+
+        def update_new_win():
+            # 어깨 판단
+            if config.outputList[0] == 1:
+                lab_img1.config(image=mini1_2, background="azure")
+            elif config.outputList[0] == 2:
+                lab_img1.config(image=mini1_3, background="azure")
+            else:
+                lab_img1.config(image=mini1_1, background="azure")
+
+            # 거북목 판단
+            if config.outputList[1] == 1:
+                lab_img2.config(image=mini2_2, background="azure")
+            elif config.outputList[1] == 2:
+                lab_img2.config(image=mini2_3, background="azure")
+            else:
+                lab_img2.config(image=mini2_1, background="azure")
+
+            # 턱괴기 판단
+            if config.outputList[2] == 1:
+                lab_img3.config(image=mini3_2, background="azure")
+            else:
+                lab_img3.config(image=mini3_1, background="azure")
+
+            # 환경 밝기 판단
+            if config.outputList[3] == 1:
+                lab_img4.config(image=mini4_2, background="azure")
+            else:
+                lab_img4.config(image=mini4_1, background="azure")
+
+            # 500ms 후에 다시 업데이트
+            new_win.after(50, update_new_win)
+
+        # 창이 생성될 때 업데이트 시작
+        update_new_win()
 
     # 등록된 자세 정보 조회
     list_from_DB = db.fetch_hpe_data()
@@ -654,7 +730,6 @@ def Main_Window(db):
     CheckVar1 = IntVar()
     c1 = Checkbutton(main_win, text="Visualization", variable=CheckVar1, bg="#C2D6E9", font=("Arial", "15", "bold"))
     c1.place(x=545, y=670)
-
 
 
     # 이후 판단을 위해 초깃값 생성
@@ -743,8 +818,7 @@ def Main_Window(db):
     # 자리비움 버튼
     disappear_image = PhotoImage(file = "UI/img/disappear_bt.png")
     disappear_button = Button(main_win, image = disappear_image, border = 0, bg = "#C2D6E9")
-    disappear_button.config(command=on_minimize)
-    disappear_button.place(x = 1160, y = 680)
+    disappear_button.place(x = 1160, y = 680) 
 
     # 영상 재생 및 판단하여 알리는 함수
     def video_play():
@@ -863,10 +937,9 @@ def Main_Window(db):
             if config.disappear == 1:
                 lbl_alarm.config(text = (user_name + "  |  자리 비움"), fg = "black")
 
-
             # 마지막 출력 시간 갱신
             config.last_time = current_time
-
+        disappear_button.config(command=on_minimize)
         img = Image.fromarray(image)
         imgtk = ImageTk.PhotoImage(image=img)
         lbl_video.imgtk = imgtk
