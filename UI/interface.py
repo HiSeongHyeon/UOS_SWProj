@@ -154,7 +154,7 @@ def Join_Window(db):
 
 
     # 오류 메시지 및 데이터베이스
-    join_error_message = Label(join_win, font = ("Arial", "10"), background = "#CBDAEC", fg = "red")
+    join_error_message = Label(join_win, font = ("Arial", "10"), background = "#B0C6E1", fg = "red")
     # 내부 함수 1. click: 입력된 두 PW가 다르면 오류, 조건에 맞으면 DB에 저장
     def click():
         input_name = ent_nickname.get()
@@ -178,7 +178,7 @@ def Join_Window(db):
     next_image = PhotoImage(file = "UI/img/next_bt.png")
     next_button = Button(join_win, image = next_image, border = 0, bg = "#CBDAEC")
     next_button.config(command=click)
-    next_button.place(x = 142, y = 480)
+    next_button.place(x = 150, y = 480)
 
 
     # 종료 키 설정 및 창 루프 생성
