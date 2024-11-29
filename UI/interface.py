@@ -336,8 +336,8 @@ def RegiPose_Window(db):
                 if config.cnt_start:
                     # 확인용 출력 코드(이후 삭제 필요)                
                     if config.cnt > 9: 
-                        guide_lab.config(text = "Restart 버튼을 눌러 재등록하거나 Register 버튼을 눌러 회원가입을 완료하세요.", fg = "green")
-                        guide_lab.place(x = 30, y = 72)
+                        guide_lab.config(text = "Restart 버튼을 눌러 재등록하거나 Register 버튼을 눌러 다음창으로 넘어가세요.", fg = "green")
+                        guide_lab.place(x = 15, y = 72)
 
                         print(config.cnt)
                         for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
@@ -350,8 +350,8 @@ def RegiPose_Window(db):
                         config.cnt = 0
                         config.complete = 0
                         config.cnt_start = 1
-                        guide_lab.config(text="10초간 손을 들고 있으세요. 손 정보 등록을 실행 중 입니다.", fg = "red")
-                        guide_lab.place(x = 75, y = 72)
+                        guide_lab.config(text="카메라를 10초간 응시하세요. 사용자 자세 등록을 실행 중 입니다.", fg = "red")
+                        guide_lab.place(x = 65, y = 72)
                         register_button.place_forget()
 
                     if config.complete == 1:
@@ -634,7 +634,7 @@ def Main_Window(db):
     frame_alarm.place(x=480, y=53)
     lbl_alarm = Label(frame_alarm, font = ("맑은고딕", "20", "bold"), background= "white")
     user_name = db.get_name()    # db에서 이름 가져오기
-    lbl_alarm.config(text = (user_name+ "  |  최근 알림: 알림 없음"))
+    lbl_alarm.config(text = (user_name+ "  |  최근 알림: 알림 없음"), fg = "black")
     lbl_alarm.place(x=10, y=7)
 
 
@@ -835,7 +835,7 @@ def Main_Window(db):
                 if (config.outputList[0] != 0 or config.outputList[1] != 0 or config.outputList[2] != 0 or config.outputList[3] != 0): 
                     lbl_alarm.config(text = (user_name + "  |  최근 알림: 자세가 불량합니다. 고쳐주세요."), fg = "red")
                 else:
-                    lbl_alarm.config(text = (user_name + "  |  최근 알림: 자세 알림이 없습니다."))
+                    lbl_alarm.config(text = (user_name + "  |  최근 알림: 자세 알림이 없습니다."), fg = "black")
 
                 print(config.brightness.output)
 
