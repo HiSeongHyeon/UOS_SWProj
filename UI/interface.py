@@ -35,25 +35,32 @@ def Login_Window(db):
     # ID 입력부
     ent_ID = Entry(login_win, font=("Arial", "15"), width = 22, bg = 'white', border = 0)
     ent_ID.insert(0,"Username")
-    def clear1(event):
+    def clear1_1(event):
         if ent_ID.get() == "Username":
             ent_ID.delete(0, len(ent_ID.get()))
-    ent_ID.bind("<Button-1>", clear1)
+    def clear1_2(event):
+        if ent_ID.get() == "":
+            ent_ID.insert(0,"Username")
+    ent_ID.bind("<FocusIn>", clear1_1)
+    ent_ID.bind("<FocusOut>", clear1_2)
     ent_ID.place(x = 650, y = 195)
 
 
     # PW 입력부
     ent_PW = Entry(login_win, font=("Arial", "15"), width = 22, bg = 'white', border = 0)
     ent_PW.insert(0,"Password")
-    def clear2(event):
+    def clear2_1(event):
         if ent_PW.get() == "Password":
             ent_PW.delete(0, len(ent_PW.get()))
-        else:
-            ent_PW.config(show = "*")
-    ent_PW.bind("<Button-1>", clear2)
-    ent_PW.bind("<ButtonRelease-1>", clear2)
-    ent_PW.bind("<FocusIn>", clear2)
-    ent_PW.bind("<Key>", clear2)
+    def clear2_2(event):
+        if ent_PW.get() == "":
+            ent_PW.config(show = "")
+            ent_PW.insert(0,"Password")
+    def clear2_3(event):
+        ent_PW.config(show = "*")
+    ent_PW.bind("<FocusIn>", clear2_1)
+    ent_PW.bind("<FocusOut>", clear2_2)
+    ent_PW.bind("<Key>", clear2_3)
     ent_PW.place(x = 650, y = 265)
 
     # 로그인 오류 메시지
@@ -121,37 +128,46 @@ def Join_Window(db):
     # Name 입력부
     ent_nickname = Entry(join_win, font=("맑은고딕", "15", "bold"), width = 23, bg = 'white', border = 0)
     ent_nickname.insert(0, "영어/한글/숫자 6자 이내")
-    def clear1(event):
+    def clear1_1(event):
         if ent_nickname.get() == "영어/한글/숫자 6자 이내":
             ent_nickname.delete(0, len(ent_nickname.get()))
-    ent_nickname.bind("<Button-1>", clear1)
-    ent_nickname.bind("<FocusIn>", clear1)
+    def clear1_2(event):
+        if ent_nickname.get() == "":
+            ent_nickname.insert(0,"영어/한글/숫자 6자 이내")
+    ent_nickname.bind("<FocusIn>", clear1_1)
+    ent_nickname.bind("<FocusOut>", clear1_2)
     ent_nickname.place(x = 157, y = 163)
 
 
     # ID 입력부
     ent_ID = Entry(join_win, font=("맑은고딕", "15", "bold"), width = 23, bg = 'white', border = 0)
     ent_ID.insert(0, "영문+숫자 12자 이내")
-    def clear2(event):
+    def clear2_1(event):
         if ent_ID.get() == "영문+숫자 12자 이내":
             ent_ID.delete(0, len(ent_ID.get()))
-    ent_ID.bind("<Button-1>", clear2)
-    ent_ID.bind("<FocusIn>", clear2)
+    def clear2_2(event):
+        if ent_ID.get() == "":
+            ent_ID.insert(0,"영문+숫자 12자 이내")
+    ent_ID.bind("<FocusIn>", clear2_1)
+    ent_ID.bind("<FocusOut>", clear2_2)
     ent_ID.place(x = 157, y = 239)
 
 
     # PW 입력부
     ent_PW = Entry(join_win, font=("맑은고딕", "15", "bold"), width = 23, bg = 'white', border = 0)
     ent_PW.insert(0, "영문,숫자,문자 12자 이내")
-    def clear3(event):
+    def clear3_1(event):
         if ent_PW.get() == "영문,숫자,문자 12자 이내":
             ent_PW.delete(0, len(ent_PW.get()))
-        else:
-            ent_PW.config(show = "*")
-    ent_PW.bind("<Button-1>", clear3)
-    ent_PW.bind("<ButtonRelease-1>", clear3)
-    ent_PW.bind("<FocusIn>", clear3)
-    ent_PW.bind("<Key>", clear3)
+    def clear3_2(event):
+        if ent_PW.get() == "":
+            ent_PW.config(show = "")
+            ent_PW.insert(0,"영문,숫자,문자 12자 이내")
+    def clear3_3(event):
+        ent_PW.config(show = "*")
+    ent_PW.bind("<FocusIn>", clear3_1)
+    ent_PW.bind("<FocusOut>", clear3_2)
+    ent_PW.bind("<Key>", clear3_3)
     ent_PW.place(x = 157, y = 315)
 
 
