@@ -84,7 +84,9 @@ def Login_Window(db):
     login_button.config(command=login)
     login_button.place(x = 635, y = 350)
 
-
+    # 엔터키 설정
+    login_win.bind("<Return>", lambda event: login())
+    
     # 내부 함수 2. join: 가입 버튼을 누르면 회원가입 창으로 바꿈
     def join():
         config.flag_win = 2
@@ -186,7 +188,9 @@ def Join_Window(db):
     next_button.config(command=click)
     next_button.place(x = 150, y = 480)
 
-
+    # 엔터키 설정
+    join_win.bind("<Return>", lambda event: click())
+    
     # 종료 키 설정 및 창 루프 생성
     join_win.protocol("WM_DELETE_WINDOW", quit)
     join_win.mainloop()
