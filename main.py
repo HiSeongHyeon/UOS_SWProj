@@ -4,6 +4,7 @@ from DB.db import Database
 from UI.interface import Login_Window
 from UI.interface import Join_Window
 from UI.interface import RegiPose_Window
+from UI.interface import RegiHand_Window
 from UI.interface import Main_Window
 
 import config
@@ -26,6 +27,8 @@ while True:
     elif (config.flag_win == 3):
         RegiPose_Window(db)
     elif (config.flag_win == 4):
+        RegiHand_Window(db)
+    elif (config.flag_win == 5):
         Main_Window(db)
     else:
         print("비정상적으로 프로그램 작동함.\n")
