@@ -517,7 +517,7 @@ def RegiHand_Window(db):
                     config.complete = 0
                     config.cnt_start = 1
                     guide_lab.config(text="10초간 손을 들고 있으세요. 손 정보 등록을 실행 중 입니다.", fg = "red")
-                    guide_lab.place(x = 75, y = 72)
+                    guide_lab.place(x = 95, y = 72)
                     start_button.place_forget()
 
                 start_button.config(command=start_reclick)
@@ -526,7 +526,7 @@ def RegiHand_Window(db):
                 if config.cnt_start:
                     # 확인용 출력 코드(이후 삭제 필요)                
                     if config.cnt > 9: 
-                        guide_lab.config(text = "Restart 버튼을 눌러 재등록하거나 Register 버튼을 눌러 회원가입을 완료하세요.", fg = "green")
+                        guide_lab.config(text = "Restart 버튼을 눌러 재등록하거나 Register 버튼을 눌러 등록을 완료하세요.", fg = "green")
                         guide_lab.place(x = 30, y = 72)
 
                         print(config.cnt)
@@ -541,7 +541,7 @@ def RegiHand_Window(db):
                         config.complete = 0
                         config.cnt_start = 1
                         guide_lab.config(text="10초간 손을 들고 있으세요. 손 정보 등록을 실행 중 입니다.", fg = "red")
-                        guide_lab.place(x = 75, y = 72)
+                        guide_lab.place(x = 95, y = 72)
                         register_button.place_forget()
 
                     if config.complete == 1:
