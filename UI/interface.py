@@ -739,6 +739,13 @@ def Main_Window(db):
     go_to_regi_button.config(command=go_to_regi)
     go_to_regi_button.place(x = 1200, y = 680)
 
+
+    # 자리비움 버튼
+    disappear_image = PhotoImage(file = "UI/img/disappear_bt.png")
+    disappear_button = Button(main_win, image = disappear_image, border = 0, bg = "#C2D6E9")
+    disappear_button.config(command=on_minimize)
+    disappear_button.place(x = 1160, y = 680)
+
     # 영상 재생 및 판단하여 알리는 함수
     def video_play():
         if config.count_time == 1:
