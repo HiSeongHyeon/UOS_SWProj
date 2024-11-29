@@ -853,6 +853,8 @@ def Main_Window(db):
                     config.cnt = 0 # 이 부분 어떻게 처리할 것인지. 확인을 누르면 cnt를 0으로 돌릴지 논의
                 else:
                     config.disappear = 0
+            if config.disappear == 1:
+                lbl_alarm.config(text = (user_name + "  |  자리 비움"), fg = "black")
 
 
             # 마지막 출력 시간 갱신
