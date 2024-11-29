@@ -202,6 +202,7 @@ def RegiPose_Window(db):
 
     # 기본 창 설정
     regi_win = Tk()
+    regi_win.overrideredirect(True)
     regi_win.geometry("600x600+400+80")
     regi_win.resizable(width=0, height=0)
     regi_win.title("HPE_Register")
@@ -383,6 +384,7 @@ def RegiPose_Window(db):
 
 
     # 종료 키 설정 및 창 루프 생성
+    regi_win.bind("<Shift-X>", quit)            # 비상용 강제 종료 키
     regi_win.protocol("WM_DELETE_WINDOW", quit)
     regi_win.mainloop()
 
@@ -394,6 +396,7 @@ def RegiHand_Window(db):
 
    # 기본 창 설정
     hand_win = Tk()
+    hand_win.overrideredirect(True)
     hand_win.geometry("600x600+400+80")
     hand_win.resizable(width=0, height=0)
     hand_win.title("HPE_Hand_Register")
@@ -571,6 +574,7 @@ def RegiHand_Window(db):
   
 
     # 종료 키 설정 및 창 루프 생성
+    hand_win.bind("<Shift-X>", quit)            # 비상용 강제 종료 키
     hand_win.protocol("WM_DELETE_WINDOW", quit)
     hand_win.mainloop()
 
