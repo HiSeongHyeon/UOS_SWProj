@@ -652,7 +652,8 @@ def Main_Window(db):
         lab_img4 = Label(new_win)
         lab_img4.config(image=mini4_1, background="azure")
         lab_img4.place(x=190,y=45)
-
+        lab_alarm = Label(new_win, font = ("맑은고딕", "15", "bold"), background= "azure")
+        lab_alarm.place(x=70, y=8)
         def update_new_win():
             # 어깨 판단
             if config.outputList[0] == 1:
@@ -681,6 +682,12 @@ def Main_Window(db):
                 lab_img4.config(image=mini4_2, background="azure")
             else:
                 lab_img4.config(image=mini4_1, background="azure")
+            # 자리비움 판단
+            if config.disappear == 1:
+                lab_alarm.config(text = "<자리 비움>", fg = "black")
+            else:
+                lab_alarm.config(text = "", fg = "black")
+
 
             # 500ms 후에 다시 업데이트
             new_win.after(50, update_new_win)
@@ -745,7 +752,7 @@ def Main_Window(db):
     img1_2 = img1_2.subsample(7)
     img1_3 = img1_3.subsample(7)
     lbl_img1 = Label(main_win)
-    lbl_img1.config(image=img1_1, background = "#CBDAEC")
+    lbl_img1.config(image=img1_1, background = "#CBDAEC", border=0)
     lbl_img1.place(x=750, y=170)
 
     # 거북목
@@ -756,7 +763,7 @@ def Main_Window(db):
     img2_2 = img2_2.subsample(7)
     img2_3 = img2_3.subsample(7)
     lbl_img2 = Label(main_win)
-    lbl_img2.config(image=img2_1, background = "#CBDAEC")
+    lbl_img2.config(image=img2_1, background = "#CBDAEC", border=0)
     lbl_img2.place(x=1000, y=170)
 
     # 턱괴기
@@ -765,7 +772,7 @@ def Main_Window(db):
     img3_1 = img3_1.subsample(7)
     img3_2 = img3_2.subsample(7)
     lbl_img3 = Label(main_win)
-    lbl_img3.config(image=img3_1, background = "#B0C6E1")
+    lbl_img3.config(image=img3_1, background = "#B0C6E1", border=0)
     lbl_img3.place(x=750, y=420)
 
     # 환경 밝기
@@ -774,7 +781,7 @@ def Main_Window(db):
     img4_1 = img4_1.subsample(7)
     img4_2 = img4_2.subsample(7)
     lbl_img4 = Label(main_win)
-    lbl_img4.config(image=img4_1, background = "#B0C6E1")
+    lbl_img4.config(image=img4_1, background = "#B0C6E1", border=0)
     lbl_img4.place(x=1000, y=420)
 
     # 내부 함수 2. join: 가입 버튼을 누르면 회원가입 창으로 바꿈
@@ -886,31 +893,31 @@ def Main_Window(db):
                 config.outputList = config.result_pose(config.estimation_pose(hand_distance))   # 파라미터에 center_mouth_dist랑 hand_distance 보내야함!
                 # 어깨 판단 
                 if config.outputList[0] == 1:
-                    lbl_img1.config(image=img1_2, background = "#CBDAEC")
+                    lbl_img1.config(image=img1_2, background = "#CBDAEC", border=0)
                 elif config.outputList[0] == 2:
-                    lbl_img1.config(image=img1_3, background = "#CBDAEC")
+                    lbl_img1.config(image=img1_3, background = "#CBDAEC", border=0)
                 else:
-                    lbl_img1.config(image=img1_1, background = "#CBDAEC")
+                    lbl_img1.config(image=img1_1, background = "#CBDAEC", border=0)
 
                 # 거북목 판단
                 if config.outputList[1] == 1:
-                    lbl_img2.config(image=img2_2, background = "#CBDAEC")
+                    lbl_img2.config(image=img2_2, background = "#CBDAEC", border=0)
                 elif config.outputList[1] == 2:
-                    lbl_img2.config(image=img2_3, background = "#CBDAEC")
+                    lbl_img2.config(image=img2_3, background = "#CBDAEC", border=0)
                 else:
-                    lbl_img2.config(image=img2_1, background = "#CBDAEC")
+                    lbl_img2.config(image=img2_1, background = "#CBDAEC", border=0)
 
                 # 턱괴기 판단
                 if config.outputList[2] == 1:
-                    lbl_img3.config(image=img3_2, background = "#B0C6E1")
+                    lbl_img3.config(image=img3_2, background = "#B0C6E1", border=0)
                 else:
-                    lbl_img3.config(image=img3_1, background = "#B0C6E1")
+                    lbl_img3.config(image=img3_1, background = "#B0C6E1", border=0)
 
                 # 환경밝기 판단
                 if config.outputList[3] == 1:
-                    lbl_img4.config(image=img4_2, background = "#B0C6E1")
+                    lbl_img4.config(image=img4_2, background = "#B0C6E1", border=0)
                 else:
-                    lbl_img4.config(image=img4_1, background = "#B0C6E1")
+                    lbl_img4.config(image=img4_1, background = "#B0C6E1", border=0)
 
                 # 메시지 변경
                 if (config.outputList[0] != 0 or config.outputList[1] != 0 or config.outputList[2] != 0 or config.outputList[3] != 0): 
