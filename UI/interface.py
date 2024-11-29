@@ -26,6 +26,7 @@ def Login_Window(db):
     login_win.geometry("1080x608+150+60")
     login_win.resizable(width=0, height=0)
     login_win.title("HPE_Login")
+    login_win.iconbitmap("UI/img/logo.ico")
     # 기본 창에 들어갈 전체 이미지 설정
     frame_photo = PhotoImage(file = "UI/img/login_bg.png")
     frame_label = Label(login_win, border = 0, image = frame_photo)
@@ -119,6 +120,7 @@ def Join_Window(db):
     join_win.geometry("466x600+400+80")
     join_win.resizable(width=0, height=0)
     join_win.title("HPE_Join")
+    join_win.iconbitmap("UI/img/logo.ico")
     # 기본 창에 들어갈 전체 이미지 설정
     frame_photo = PhotoImage(file = "UI/img/join_bg.png")
     frame_label = Label(join_win, border = 0, image = frame_photo)
@@ -222,6 +224,7 @@ def RegiPose_Window(db):
     regi_win.geometry("600x600+400+80")
     regi_win.resizable(width=0, height=0)
     regi_win.title("HPE_Register")
+    regi_win.iconbitmap("UI/img/logo.ico")
     # 기본 창에 들어갈 전체 이미지 설정
     frame_photo = PhotoImage(file = "UI/img/regi_bg.png")
     frame_label = Label(regi_win, border = 0, image = frame_photo)
@@ -416,6 +419,7 @@ def RegiHand_Window(db):
     hand_win.geometry("600x600+400+80")
     hand_win.resizable(width=0, height=0)
     hand_win.title("HPE_Hand_Register")
+    hand_win.iconbitmap("UI/img/logo.ico")
     # 기본 창에 들어갈 전체 이미지 설정
     frame_photo = PhotoImage(file = "UI/img/regi_bg.png")
     frame_label = Label(hand_win, border = 0, image = frame_photo)
@@ -723,7 +727,8 @@ def Main_Window(db):
     main_win = Tk()
     main_win.geometry("1280x720+10+10")
     main_win.resizable(width=0, height=0)
-    main_win.title("두회랑 중재")
+    main_win.title("Duhoi And Jeungjae")
+    main_win.iconbitmap("UI/img/logo.ico")
     # 기본 창에 들어갈 전체 이미지 설정
     frame_photo = PhotoImage(file = "UI/img/main_bg.png")
     frame_label = Label(main_win, border = 0, image = frame_photo)
