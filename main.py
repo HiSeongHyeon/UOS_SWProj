@@ -7,7 +7,20 @@ from UI.interface import RegiPose_Window
 from UI.interface import RegiHand_Window
 from UI.interface import Main_Window
 
+import sys
 import config
+
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    class NullOutput(object):
+        def write(self, string):
+            pass
+
+        def isatty(self):
+            return False
+
+
+    sys.stdout = NullOutput()
+    sys.stderr = NullOutput()
 
 # HPE 모듈에서 사용하는 함수
 # from HPE import HPE_test_ver2
@@ -19,7 +32,7 @@ db = Database()
 db.create_tables()
 
 
-while True:
+while config.flag_win != 0:
     if (config.flag_win == 1):
         Login_Window(db)
     elif (config.flag_win == 2):
@@ -32,6 +45,7 @@ while True:
         Main_Window(db)
     else:
         print("비정상적으로 프로그램 작동함.\n")
+        config.flag_win = 0
         quit()
 
 
