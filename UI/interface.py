@@ -16,7 +16,13 @@ from HPE.class_mod import *
 # DB 연결부
 from DB.db import * # import <사용할 클래스 혹은 함수>
 
+video_frames = [None]
 
+# PyInstaller 경로 찾기 함수
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 # 화면 1. 로그인
 def Login_Window(db):
@@ -28,10 +34,15 @@ def Login_Window(db):
     login_win.title("HPE_Login")
     login_win.iconbitmap("UI/img/logo.ico")
     # 기본 창에 들어갈 전체 이미지 설정
-    frame_photo = PhotoImage(file = "UI/img/login_bg.png")
-    frame_label = Label(login_win, border = 0, image = frame_photo)
+    image_path1 = resource_path("UI/img/login_bg.png")
+    login_win.frame_photo = PhotoImage(file = image_path1,master=login_win)
+    frame_label = Label(login_win, border = 0, image = login_win.frame_photo)
     frame_label.pack(fill = "both", expand = True)
-
+    
+    #창닫기 함수 정의 
+    def on_close():
+        login_win.destroy()
+        config.flag_win=0
 
     # ID 입력부
     ent_ID = Entry(login_win, font=("Arial", "15"), width = 22, bg = 'white', border = 0)
@@ -87,8 +98,9 @@ def Login_Window(db):
             login_error_message.config(text = "Please check your ID or password.")
     login_error_message.place(x = 655, y = 320)
     # 로그인 버튼
-    login_image = PhotoImage(file = "UI/img/login_bt.png")
-    login_button = Button(login_win, image = login_image, border = 0, bg = "#E0E0E0")
+    image_path2 = resource_path("UI/img/login_bt.png")
+    login_win.login_image = PhotoImage(file = image_path2,master=login_win)
+    login_button = Button(login_win, image = login_win.login_image, border = 0, bg = "#E0E0E0")
     login_button.config(command=login)
     login_button.place(x = 635, y = 350)
 
@@ -100,14 +112,15 @@ def Login_Window(db):
         config.flag_win = 2
         login_win.destroy()
     # 회원가입 버튼
-    join_image = PhotoImage(file = "UI/img/create_account_bt.png")
-    join_button = Button(login_win, image = join_image, border = 0, bg = "#E0E0E0")
+    image_path3 = resource_path("UI/img/create_account_bt.png")
+    login_win.join_image = PhotoImage(file = image_path3,master=login_win)
+    join_button = Button(login_win, image = login_win.join_image, border = 0, bg = "#E0E0E0")
     join_button.config(command=join)
     join_button.place(x = 635, y = 400)
 
 
     # 종료 키 및 창 루프 생성
-    login_win.protocol("WM_DELETE_WINDOW", quit)
+    login_win.protocol("WM_DELETE_WINDOW", on_close)
     login_win.mainloop()
 
 
@@ -122,9 +135,15 @@ def Join_Window(db):
     join_win.title("HPE_Join")
     join_win.iconbitmap("UI/img/logo.ico")
     # 기본 창에 들어갈 전체 이미지 설정
-    frame_photo = PhotoImage(file = "UI/img/join_bg.png")
-    frame_label = Label(join_win, border = 0, image = frame_photo)
+    image_path4 = resource_path("UI/img/join_bg.png")
+    join_win.frame_photo = PhotoImage(file = image_path4,master=join_win)
+    frame_label = Label(join_win, border = 0, image = join_win.frame_photo)
     frame_label.pack(fill = "both", expand = True)
+    
+    #창닫기 함수 정의
+    def on_close():
+        join_win.destroy()
+        config.flag_win=0
 
 
     # Name 입력부
@@ -200,9 +219,11 @@ def Join_Window(db):
             config.flag_win = 1
             join_win.destroy()
     join_error_message.place(x = 125, y = 445)
+    
     # 다음 버튼
-    next_image = PhotoImage(file = "UI/img/next_bt.png")
-    next_button = Button(join_win, image = next_image, border = 0, bg = "#CBDAEC")
+    image_path5 = resource_path("UI/img/next_bt.png")
+    join_win.next_image = PhotoImage(file = image_path5,master=join_win)
+    next_button = Button(join_win, image = join_win.next_image, border = 0, bg = "#CBDAEC")
     next_button.config(command=click)
     next_button.place(x = 150, y = 480)
 
@@ -210,7 +231,7 @@ def Join_Window(db):
     join_win.bind("<Return>", lambda event: click())
 
     # 종료 키 설정 및 창 루프 생성
-    join_win.protocol("WM_DELETE_WINDOW", quit)
+    join_win.protocol("WM_DELETE_WINDOW", on_close)
     join_win.mainloop()
 
 
@@ -226,8 +247,9 @@ def RegiPose_Window(db):
     regi_win.title("HPE_Register")
     regi_win.iconbitmap("UI/img/logo.ico")
     # 기본 창에 들어갈 전체 이미지 설정
-    frame_photo = PhotoImage(file = "UI/img/regi_bg.png")
-    frame_label = Label(regi_win, border = 0, image = frame_photo)
+    image_path6 = resource_path("UI/img/regi_bg.png")
+    regi_win.frame_photo = PhotoImage(file = image_path6,master=regi_win)
+    frame_label = Label(regi_win, border = 0, image = regi_win.frame_photo)
     frame_label.pack(fill = "both", expand = True)
 
 
@@ -238,28 +260,37 @@ def RegiPose_Window(db):
 
 
     # 등록 완료 버튼 선언만
-    register_image = PhotoImage(file = "UI/img/register_bt.png")
-    register_button = Button(regi_win, image = register_image, border = 0, bg = "#CBDAEC")
+    image_path7 = resource_path("UI/img/register_bt.png")
+    regi_win.register_image = PhotoImage(file = image_path7,master=regi_win)
+    register_button = Button(regi_win, image = regi_win.register_image, border = 0, bg = "#CBDAEC")
     
     # 재등록 버튼 선언만
-    restart_image = PhotoImage(file = "UI/img/restart_bt.png")
-    restart_button = Button(regi_win, image = restart_image, border = 0, bg = "#CBDAEC")
+    regi_win.restart_image = PhotoImage(file = "UI/img/restart_bt.png",master=regi_win)
+    restart_button = Button(regi_win, image = regi_win.restart_image, border = 0, bg = "#CBDAEC")
 
     # 등록 시작 버튼 선언만
-    start_image = PhotoImage(file = "UI/img/start_bt.png")
-    start_button = Button(regi_win, image = start_image, border = 0, bg = "#CBDAEC")
+    image_path8=resource_path("UI/img/start_bt.png")
+    regi_win.start_image = PhotoImage(file = image_path8,master=regi_win)
+    start_button = Button(regi_win, image = regi_win.start_image, border = 0, bg = "#CBDAEC")
     start_button.place(x = 205, y = 510)
 
     # 카메라 프레임 설정
     frm = Frame(regi_win, width = 520, height = 416)
     frm.place(x = 39, y = 115)
-    lbl_video = Label(frm)
-    lbl_video.pack()
+    lbl_video1 = Label(frm)
+    lbl_video1.pack()
     
     # mediapipe & camera 켜기
     cap = cv2.VideoCapture(0)
     mp_drawing = mp.solutions.drawing_utils
     mp_pose = mp.solutions.pose
+    
+    #창닫기 함수
+    def on_close():
+        if cap.isOpened():
+            cap.release()  # 카메라 리소스 해제
+        regi_win.destroy()
+        config.flag_win=0
 
     # 이후 판단을 위해 초깃값 생성
     Initial_last_time = time.time()
@@ -391,20 +422,18 @@ def RegiPose_Window(db):
             config.last_time = current_time
         
         img = Image.fromarray(image)
-        imgtk = ImageTk.PhotoImage(image=img)
-        lbl_video.imgtk = imgtk
-        lbl_video.configure(image=imgtk)
-        lbl_video.after(10, video_play)
+        imgtk = ImageTk.PhotoImage(image=img)         
+        video_frames[0]=imgtk
+        
+        lbl_video1.configure(image=imgtk)
+        lbl_video1.imgtk = imgtk
+        lbl_video1.after(10, video_play)
 
     video_play()
     
-
-  
-
-
     # 종료 키 설정 및 창 루프 생성
-    regi_win.bind("<Shift-X>", quit)            # 비상용 강제 종료 키
-    regi_win.protocol("WM_DELETE_WINDOW", quit)
+    regi_win.bind("<Shift-X>", on_close)
+    regi_win.protocol("WM_DELETE_WINDOW", on_close)
     regi_win.mainloop()
 
 
@@ -420,9 +449,11 @@ def RegiHand_Window(db):
     hand_win.resizable(width=0, height=0)
     hand_win.title("HPE_Hand_Register")
     hand_win.iconbitmap("UI/img/logo.ico")
+    
     # 기본 창에 들어갈 전체 이미지 설정
-    frame_photo = PhotoImage(file = "UI/img/regi_bg.png")
-    frame_label = Label(hand_win, border = 0, image = frame_photo)
+    image_path9 = resource_path("UI/img/regi_bg.png")
+    hand_win.frame_photo = PhotoImage(file = image_path9,master=hand_win)
+    frame_label = Label(hand_win, border = 0, image = hand_win.frame_photo)
     frame_label.pack(fill = "both", expand = True)
 
 
@@ -433,28 +464,38 @@ def RegiHand_Window(db):
 
 
     # 등록 완료 버튼 선언만
-    register_image = PhotoImage(file = "UI/img/register_bt.png")
-    register_button = Button(hand_win, image = register_image, border = 0, bg = "#CBDAEC")
+    image_path10 = resource_path("UI/img/register_bt.png")
+    hand_win.register_image = PhotoImage(file = image_path10,master=hand_win)
+    register_button = Button(hand_win, image = hand_win.register_image, border = 0, bg = "#CBDAEC")
     
     # 재등록 버튼 선언만
-    restart_image = PhotoImage(file = "UI/img/restart_bt.png")
-    restart_button = Button(hand_win, image = restart_image, border = 0, bg = "#CBDAEC")
+    image_path11 = resource_path("UI/img/restart_bt.png")
+    hand_win.restart_image = PhotoImage(file = image_path11,master=hand_win)
+    restart_button = Button(hand_win, image = hand_win.restart_image, border = 0, bg = "#CBDAEC")
 
     # 등록 시작 버튼 선언만
-    start_image = PhotoImage(file = "UI/img/start_bt.png")
-    start_button = Button(hand_win, image = start_image, border = 0, bg = "#CBDAEC")
+    image_path12 = resource_path("UI/img/start_bt.png")
+    hand_win.start_image = PhotoImage(file = image_path12,master=hand_win)
+    start_button = Button(hand_win, image = hand_win.start_image, border = 0, bg = "#CBDAEC")
     start_button.place(x = 205, y = 510)
 
     # 카메라 프레임 설정
     frm = Frame(hand_win, width = 520, height = 416)
     frm.place(x = 39, y = 115)
-    lbl_video = Label(frm)
-    lbl_video.pack()
+    lbl_video2 = Label(frm)
+    lbl_video2.pack()
     
     # mediapipe & camera 켜기
     cap = cv2.VideoCapture(0)
     mp_drawing = mp.solutions.drawing_utils
     mp_pose = mp.solutions.pose
+    
+    #창닫기 함수
+    def on_close():
+        if cap.isOpened():
+            cap.release()  # 카메라 리소스 해제
+        hand_win.destroy()
+        config.flag_win=0
 
     # 이후 판단을 위해 초깃값 생성
     Initial_last_time = time.time()
@@ -472,7 +513,6 @@ def RegiHand_Window(db):
             print("카메라 없음")
             return
         
-
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = cv2.flip(image, 1)
         image = cv2.resize(image, (520, 360))
@@ -584,18 +624,19 @@ def RegiHand_Window(db):
             config.last_time = current_time
         
         img = Image.fromarray(image)
-        imgtk = ImageTk.PhotoImage(image=img)
-        lbl_video.imgtk = imgtk
-        lbl_video.configure(image=imgtk)
-        lbl_video.after(10, video_play)
+        imgtk = ImageTk.PhotoImage(image=img)            ##여기도 해결 필요
+        video_frames[0]=imgtk
+        lbl_video2.configure(image=imgtk)
+        lbl_video2.imgtk = imgtk
+        lbl_video2.after(10, video_play)
 
     video_play()
     
   
 
     # 종료 키 설정 및 창 루프 생성
-    hand_win.bind("<Shift-X>", quit)            # 비상용 강제 종료 키
-    hand_win.protocol("WM_DELETE_WINDOW", quit)
+    hand_win.bind("<Shift-X>", on_close)
+    hand_win.protocol("WM_DELETE_WINDOW", on_close)
     hand_win.mainloop()
 
 
@@ -653,59 +694,71 @@ def Main_Window(db):
         new_win.attributes('-alpha', 1)
 
         # 이미지 설정
-        mini1_1 = PhotoImage(file="UI/img/spine1.png", master=new_win)
-        mini1_2 = PhotoImage(file="UI/img/spine2.png", master=new_win)
-        mini1_3 = PhotoImage(file="UI/img/spine3.png", master=new_win)
-        mini2_1 = PhotoImage(file="UI/img/neck1.png", master=new_win)
-        mini2_2 = PhotoImage(file="UI/img/neck2.png", master=new_win)
-        mini2_3 = PhotoImage(file="UI/img/neck3.png", master=new_win)
-        mini3_1 = PhotoImage(file="UI/img/chin1.png", master=new_win)
-        mini3_2 = PhotoImage(file="UI/img/chin2.png", master=new_win)
-        mini4_1 = PhotoImage(file="UI/img/bright1.png", master=new_win)
-        mini4_2 = PhotoImage(file="UI/img/bright2.png", master=new_win)
+        
+        image_path13 = resource_path("UI/img/spine1.png")
+        new_win.mini1_1 = PhotoImage(file=image_path13, master=new_win)
+        image_path14 = resource_path("UI/img/spine2.png")
+        new_win.mini1_2 = PhotoImage(file=image_path14, master=new_win)
+        image_path15 = resource_path("UI/img/spine3.png")
+        new_win.mini1_3 = PhotoImage(file=image_path15, master=new_win)
+        image_path16 = resource_path("UI/img/neck1.png")
+        new_win.mini2_1 = PhotoImage(file=image_path16, master=new_win)
+        image_path17 = resource_path("UI/img/neck2.png")
+        new_win.mini2_2 = PhotoImage(file=image_path17, master=new_win)
+        image_path18 = resource_path("UI/img/neck3.png")
+        new_win.mini2_3 = PhotoImage(file=image_path18, master=new_win)
+        image_path19 = resource_path("UI/img/chin1.png")
+        new_win.mini3_1 = PhotoImage(file=image_path19, master=new_win)
+        image_path20 = resource_path("UI/img/chin2.png")
+        new_win.mini3_2 = PhotoImage(file=image_path20, master=new_win)
+        image_path21 = resource_path("UI/img/bright1.png")
+        new_win.mini4_1 = PhotoImage(file=image_path21, master=new_win)
+        image_path22 = resource_path("UI/img/bright2.png")
+        new_win.mini4_2 = PhotoImage(file=image_path22, master=new_win)
 
         lab_img1 = Label(new_win)
-        lab_img1.config(image=mini1_1, background="azure")
+        lab_img1.config(image=new_win.mini1_1, background="azure")
         lab_img1.place(x=10,y=45)
         lab_img2 = Label(new_win)
-        lab_img2.config(image=mini2_1, background="azure")
+        lab_img2.config(image=new_win.mini2_1, background="azure")
         lab_img2.place(x=70,y=45)
         lab_img3 = Label(new_win)
-        lab_img3.config(image=mini3_1, background="azure")
+        lab_img3.config(image=new_win.mini3_1, background="azure")
         lab_img3.place(x=130,y=45)
         lab_img4 = Label(new_win)
-        lab_img4.config(image=mini4_1, background="azure")
+        lab_img4.config(image=new_win.mini4_1, background="azure")
         lab_img4.place(x=190,y=45)
         lab_alarm = Label(new_win, font = ("맑은고딕", "15", "bold"), background= "azure")
         lab_alarm.place(x=70, y=8)
         def update_new_win():
             # 어깨 판단
             if config.outputList[0] == 1:
-                lab_img1.config(image=mini1_2, background="azure")
+                lab_img1.config(image=new_win.mini1_2, background="azure")
             elif config.outputList[0] == 2:
-                lab_img1.config(image=mini1_3, background="azure")
+                lab_img1.config(image=new_win.mini1_3, background="azure")
             else:
-                lab_img1.config(image=mini1_1, background="azure")
+                lab_img1.config(image=new_win.mini1_1, background="azure")
 
             # 거북목 판단
             if config.outputList[1] == 1:
-                lab_img2.config(image=mini2_2, background="azure")
+                lab_img2.config(image=new_win.mini2_2, background="azure")
             elif config.outputList[1] == 2:
-                lab_img2.config(image=mini2_3, background="azure")
+                lab_img2.config(image=new_win.mini2_3, background="azure")
             else:
-                lab_img2.config(image=mini2_1, background="azure")
+                lab_img2.config(image=new_win.mini2_1, background="azure")
 
             # 턱괴기 판단
             if config.outputList[2] == 1:
-                lab_img3.config(image=mini3_2, background="azure")
+                lab_img3.config(image=new_win.mini3_2, background="azure")
             else:
-                lab_img3.config(image=mini3_1, background="azure")
+                lab_img3.config(image=new_win.mini3_1, background="azure")
 
             # 환경 밝기 판단
             if config.outputList[3] == 1:
-                lab_img4.config(image=mini4_2, background="azure")
+                lab_img4.config(image=new_win.mini4_2, background="azure")
             else:
-                lab_img4.config(image=mini4_1, background="azure")
+                lab_img4.config(image=new_win.mini4_1, background="azure")
+            
             # 자리비움 판단
             if config.disappear == 1:
                 lab_alarm.config(text = "<자리 비움>", fg = "black")
@@ -730,8 +783,9 @@ def Main_Window(db):
     main_win.title("Duhoi And Jeungjae")
     main_win.iconbitmap("UI/img/logo.ico")
     # 기본 창에 들어갈 전체 이미지 설정
-    frame_photo = PhotoImage(file = "UI/img/main_bg.png")
-    frame_label = Label(main_win, border = 0, image = frame_photo)
+    image_path23 = resource_path("UI/img/main_bg.png")
+    main_win.frame_photo = PhotoImage(file = image_path23,master=main_win)
+    frame_label = Label(main_win, border = 0, image = main_win.frame_photo)
     frame_label.pack(fill = "both", expand = True)
 
     # 백그라운드 화면 조건
@@ -749,13 +803,20 @@ def Main_Window(db):
     # 카메라 프레임 설정
     frm = Frame(main_win, width = 650, height = 520)
     frm.place(x = 39, y = 145)
-    lbl_video = Label(frm)
-    lbl_video.pack()
+    lbl_video3 = Label(frm)
+    lbl_video3.pack()
     # videocapture 객체를 통해 동영상 재생
     cap = cv2.VideoCapture(0)
     mp_drawing = mp.solutions.drawing_utils
     mp_drawing_styles = mp.solutions.drawing_styles
     mp_pose = mp.solutions.pose
+    
+    #창닫기 함수 정의
+    def on_close():
+        if cap.isOpened():
+            cap.release()  # 카메라 리소스 해제
+        main_win.destroy()
+        config.flag_win=0
 
 
     # 체크박스 변수와 버튼을 정의
@@ -770,43 +831,56 @@ def Main_Window(db):
 
     # 알림 이미지 기본값
     # 어깨
-    img1_1 = PhotoImage(file="UI/img/scoliosis_good.png", master=main_win)      # 0단계(good)
-    img1_2 = PhotoImage(file="UI/img/scoliosis_caution.png", master=main_win)    # 1단계
-    img1_3 = PhotoImage(file="UI/img/scoliosis_warning.png", master=main_win)    # 2단계(bad)
-    img1_1 = img1_1.subsample(7)
-    img1_2 = img1_2.subsample(7)
-    img1_3 = img1_3.subsample(7)
+    image_path24 = resource_path("UI/img/scoliosis_good.png")
+    main_win.img1_1 = PhotoImage(file=image_path24, master=main_win)      # 0단계(good)
+    image_path25 = resource_path("UI/img/scoliosis_caution.png")
+    main_win.img1_2 = PhotoImage(file=image_path25, master=main_win)    # 1단계
+    image_path26 = resource_path("UI/img/scoliosis_warning.png")
+    main_win.img1_3 = PhotoImage(file=image_path26, master=main_win)    # 2단계(bad)
+    main_win.img1_1 = main_win.img1_1.subsample(7)
+    main_win.img1_2 = main_win.img1_2.subsample(7)
+    main_win.img1_3 = main_win.img1_3.subsample(7)
     lbl_img1 = Label(main_win)
-    lbl_img1.config(image=img1_1, background = "#CBDAEC", border=0)
+    lbl_img1.config(image=main_win.img1_1, background = "#CBDAEC", border=0)
     lbl_img1.place(x=750, y=170)
 
     # 거북목
-    img2_1 = PhotoImage(file="UI/img/forward_head_good.png", master=main_win)
-    img2_2 = PhotoImage(file="UI/img/forward_head_caution.png", master=main_win)
-    img2_3 = PhotoImage(file="UI/img/forward_head_warning.png", master=main_win)
-    img2_1 = img2_1.subsample(7)
-    img2_2 = img2_2.subsample(7)
-    img2_3 = img2_3.subsample(7)
+    image_path27 = resource_path("UI/img/forward_head_good.png")
+    main_win.img2_1 = PhotoImage(file=image_path27, master=main_win)
+    image_path28 = resource_path("UI/img/forward_head_caution.png")
+    main_win.img2_2 = PhotoImage(file=image_path28, master=main_win)
+    image_path29 = resource_path("UI/img/forward_head_warning.png")
+    main_win.img2_3 = PhotoImage(file=image_path29, master=main_win)
+    main_win.img2_1 = main_win.img2_1.subsample(7)
+    main_win.img2_2 = main_win.img2_2.subsample(7)
+    main_win.img2_3 = main_win.img2_3.subsample(7)
     lbl_img2 = Label(main_win)
-    lbl_img2.config(image=img2_1, background = "#CBDAEC", border=0)
+    lbl_img2.config(image=main_win.img2_1, background = "#CBDAEC", border=0)
     lbl_img2.place(x=1000, y=170)
 
     # 턱괴기
-    img3_1 = PhotoImage(file="UI/img/chin_hold_good.png", master=main_win)
-    img3_2 = PhotoImage(file="UI/img/chin_hold_warning.png", master=main_win)
-    img3_1 = img3_1.subsample(7)
-    img3_2 = img3_2.subsample(7)
+    image_path30 = resource_path("UI/img/chin_hold_good.png")
+    main_win.img3_1 = PhotoImage(file=image_path30, master=main_win)
+    
+    image_path31 = resource_path("UI/img/chin_hold_warning.png")
+    main_win.img3_2 = PhotoImage(file=image_path31, master=main_win)
+    
+    main_win.img3_1 = main_win.img3_1.subsample(7)
+    main_win.img3_2 = main_win.img3_2.subsample(7)
+    
     lbl_img3 = Label(main_win)
-    lbl_img3.config(image=img3_1, background = "#B0C6E1", border=0)
+    lbl_img3.config(image=main_win.img3_1, background = "#B0C6E1", border=0)
     lbl_img3.place(x=750, y=420)
 
     # 환경 밝기
-    img4_1 = PhotoImage(file="UI/img/brightness_good.png", master=main_win)
-    img4_2 = PhotoImage(file="UI/img/brightness_warning.png", master=main_win)
-    img4_1 = img4_1.subsample(7)
-    img4_2 = img4_2.subsample(7)
+    image_path32 = resource_path("UI/img/brightness_good.png")
+    main_win.img4_1 = PhotoImage(file=image_path32, master=main_win)
+    image_path33 = resource_path("UI/img/brightness_warning.png")
+    main_win.img4_2 = PhotoImage(file=image_path33, master=main_win)
+    main_win.img4_1 = main_win.img4_1.subsample(7)
+    main_win.img4_2 = main_win.img4_2.subsample(7)
     lbl_img4 = Label(main_win)
-    lbl_img4.config(image=img4_1, background = "#B0C6E1", border=0)
+    lbl_img4.config(image=main_win.img4_1, background = "#B0C6E1", border=0)
     lbl_img4.place(x=1000, y=420)
 
     # 내부 함수 2. join: 가입 버튼을 누르면 회원가입 창으로 바꿈
@@ -820,8 +894,9 @@ def Main_Window(db):
         main_win.destroy()
 
     # 로그아웃 버튼
-    logout_image = PhotoImage(file = "UI/img/logout_bt.png")
-    logout_button = Button(main_win, image = logout_image, border = 0, bg = "#C2D6E9")
+    image_path34 = resource_path("UI/img/logout_bt.png")
+    main_win.logout_image = PhotoImage(file = image_path34,master=main_win)
+    logout_button = Button(main_win, image = main_win.logout_image, border = 0, bg = "#C2D6E9")
     logout_button.config(command=logout)
     logout_button.place(x = 1240, y = 680)
 
@@ -841,15 +916,17 @@ def Main_Window(db):
         main_win.destroy() 
 
     # 재등록 버튼
-    go_to_regi_image = PhotoImage(file = "UI/img/go_to_regi.png")
-    go_to_regi_button = Button(main_win, image = go_to_regi_image, border = 0, bg = "#C2D6E9")
+    image_path35 = resource_path("UI/img/go_to_regi.png")
+    main_win.go_to_regi_image = PhotoImage(file = image_path35,master=main_win)
+    go_to_regi_button = Button(main_win, image = main_win.go_to_regi_image, border = 0, bg = "#C2D6E9")
     go_to_regi_button.config(command=go_to_regi)
     go_to_regi_button.place(x = 1200, y = 680)
 
 
     # 자리비움 버튼
-    disappear_image = PhotoImage(file = "UI/img/disappear_bt.png")
-    disappear_button = Button(main_win, image = disappear_image, border = 0, bg = "#C2D6E9")
+    image_path36 = resource_path("UI/img/disappear_bt.png")
+    main_win.disappear_image = PhotoImage(file = image_path36,master=main_win)
+    disappear_button = Button(main_win, image = main_win.disappear_image, border = 0, bg = "#C2D6E9")
     disappear_button.place(x = 1160, y = 680) 
 
     # 영상 재생 및 판단하여 알리는 함수
@@ -864,7 +941,6 @@ def Main_Window(db):
         if not success:
             print("카메라 없음")
             return
-
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = cv2.flip(image, 1)
@@ -894,6 +970,13 @@ def Main_Window(db):
         if current_time - config.last_time >= 1.0:
             # [[틀린 기준 판단]] HPE를 성공한다면 출력 - README 파일의 키포인트 넘버 확인
             if results.pose_landmarks:
+                config.cnt = 0 # 사람이 자리에 있다는 것이므로 자리비움 카운트 초기화
+                config.disappear = 0
+
+                # DB에 등록된 자세 판단 기준
+                center_mouth_dist_DB = hpe_data_DB[2]
+                hand_distance_DB = min(hpe_data_DB[3], hpe_data_DB[4])
+
                 # 단일 키 포인트
                 left_shoulder = results.pose_landmarks.landmark[11]
                 right_shoulder = results.pose_landmarks.landmark[12]
@@ -902,47 +985,54 @@ def Main_Window(db):
                 left_ankle = results.pose_landmarks.landmark[28]
                 right_ankle = results.pose_landmarks.landmark[29]
 
-                # 합성 키 포인트
+               # 합성 키 포인트
                 angle_shoulder = abs(math.degrees(math.atan(right_shoulder.y - left_shoulder.y)/(right_shoulder.x - left_shoulder.x)))
                 center_mouth_dist = (left_mouth.z + right_mouth.z)/2
                 left_hand_distance = math.sqrt((left_mouth.x - left_ankle.x)**2 + (left_mouth.y - left_ankle.y)**2 + 10*(left_mouth.z - left_ankle.z)**2)
-                right_hand_distance = math.sqrt(10*(right_mouth.x - right_ankle.x)**2 + (right_mouth.y - right_ankle.y)**2 + 10*(right_mouth.z - right_ankle.z)**2)
+                right_hand_distance = math.sqrt(10*(right_mouth.x - right_ankle.x)**2 + (right_mouth.y - right_ankle.y)**2 ) #+ 10*(right_mouth.z - right_ankle.z)**2
                 
                 config.angle_waist.data = angle_shoulder
                 config.turttle_neck.data = center_mouth_dist
-                config.hands.data = min(left_hand_distance, right_hand_distance)
-                
-                hand_distance = (hpe_data_DB[3]+hpe_data_DB[4])/2
-                
 
-                config.outputList = config.result_pose(config.estimation_pose(hand_distance))   # 파라미터에 center_mouth_dist랑 hand_distance 보내야함!
+                if 10000*left_ankle.visibility >= 0.1 and 10000*right_ankle.visibility >= 0.1:
+                    config.hands.data = min(left_hand_distance, right_hand_distance)
+                elif 10000*left_ankle.visibility >= 0.1 and 10000*right_ankle.visibility < 0.1:
+                    config.hands.data = left_hand_distance
+                elif 10000*left_ankle.visibility < 0.1 and 10000*right_ankle.visibility >= 0.1:
+                    config.hands.data = right_hand_distance
+                else:
+                    config.hands.data = hand_distance_DB
+                             
+                
+                config.outputList = config.result_pose(config.estimation_pose(center_mouth_dist_DB ,hand_distance_DB))   # 파라미터에 center_mouth_dist랑 hand_distance 보내야함!
+
                 # 어깨 판단 
                 if config.outputList[0] == 1:
-                    lbl_img1.config(image=img1_2, background = "#CBDAEC", border=0)
+                    lbl_img1.config(image=main_win.img1_2, background = "#CBDAEC", border=0)
                 elif config.outputList[0] == 2:
-                    lbl_img1.config(image=img1_3, background = "#CBDAEC", border=0)
+                    lbl_img1.config(image=main_win.img1_3, background = "#CBDAEC", border=0)
                 else:
-                    lbl_img1.config(image=img1_1, background = "#CBDAEC", border=0)
+                    lbl_img1.config(image=main_win.img1_1, background = "#CBDAEC", border=0)
 
                 # 거북목 판단
                 if config.outputList[1] == 1:
-                    lbl_img2.config(image=img2_2, background = "#CBDAEC", border=0)
+                    lbl_img2.config(image=main_win.img2_2, background = "#CBDAEC", border=0)
                 elif config.outputList[1] == 2:
-                    lbl_img2.config(image=img2_3, background = "#CBDAEC", border=0)
+                    lbl_img2.config(image=main_win.img2_3, background = "#CBDAEC", border=0)
                 else:
-                    lbl_img2.config(image=img2_1, background = "#CBDAEC", border=0)
+                    lbl_img2.config(image=main_win.img2_1, background = "#CBDAEC", border=0)
 
                 # 턱괴기 판단
                 if config.outputList[2] == 1:
-                    lbl_img3.config(image=img3_2, background = "#B0C6E1", border=0)
+                    lbl_img3.config(image=main_win.img3_2, background = "#B0C6E1", border=0)
                 else:
-                    lbl_img3.config(image=img3_1, background = "#B0C6E1", border=0)
+                    lbl_img3.config(image=main_win.img3_1, background = "#B0C6E1", border=0)
 
                 # 환경밝기 판단
                 if config.outputList[3] == 1:
-                    lbl_img4.config(image=img4_2, background = "#B0C6E1", border=0)
+                    lbl_img4.config(image=main_win.img4_2, background = "#B0C6E1", border=0)
                 else:
-                    lbl_img4.config(image=img4_1, background = "#B0C6E1", border=0)
+                    lbl_img4.config(image=main_win.img4_1, background = "#B0C6E1", border=0)
 
                 # 메시지 변경
                 if (config.outputList[0] != 0 or config.outputList[1] != 0 or config.outputList[2] != 0 or config.outputList[3] != 0): 
@@ -950,11 +1040,15 @@ def Main_Window(db):
                 else:
                     lbl_alarm.config(text = (user_name + "  |  최근 알림: 자세 알림이 없습니다."), fg = "black")
 
-                print(config.brightness.output)
 
-                for i in range(4):
-                    print(config.outputList[i])
+                 # 디버깅용
+                #print(10000*left_ankle.visibility)
+                #print(10000*right_ankle.visibility)
+                #print(config.hands.output)
+                #print(config.estimation_pose())
 
+                # for i in range(4):
+                #     print(config.outputList[i])
 
                 #print(f"cnt = {angle_waist.cnt:.4f}")
                 #print(f"data = {angle_waist.data:.4f}")
@@ -963,25 +1057,30 @@ def Main_Window(db):
                 config.cnt += 1
                 if config.cnt > 10: # 확인 빠르게 하기 위해 10초로 설정, 추후에 1분으로 고치면 될 듯
                     config.disappear = 1
-                    config.cnt = 0 # 이 부분 어떻게 처리할 것인지. 확인을 누르면 cnt를 0으로 돌릴지 논의
                 else:
                     config.disappear = 0
+                ####################################################
+                
+            print(config.cnt)
             if config.disappear == 1:
                 lbl_alarm.config(text = (user_name + "  |  자리 비움"), fg = "black")
+
 
             # 마지막 출력 시간 갱신
             config.last_time = current_time
         disappear_button.config(command=on_minimize)
         img = Image.fromarray(image)
-        imgtk = ImageTk.PhotoImage(image=img)
-        lbl_video.imgtk = imgtk
-        lbl_video.configure(image=imgtk)
-        lbl_video.after(10, video_play)
+        imgtk = ImageTk.PhotoImage(image=img)   ##여기도 마찬가지
+        video_frames[0]=imgtk
+       
+        lbl_video3.configure(image=imgtk)
+        lbl_video3.imgtk = imgtk
+        lbl_video3.after(10, video_play)
 
     video_play()
 
 
     # 종료 키 설정 및 창 루프 생성
-    main_win.protocol("WM_DELETE_WINDOW", quit)
+    main_win.protocol("WM_DELETE_WINDOW", on_close)
     main_win.mainloop()
 
