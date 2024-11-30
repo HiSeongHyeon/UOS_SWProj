@@ -69,7 +69,7 @@ hands = hands(data = 0.0, queue = q_hands, output = 0.0)
 brightness = brightness(data = 0.0, queue = q_brightness, output = 0.0)
 
 
-def estimation_pose(center_mouth_dist_cho):
+def estimation_pose(center_mouth_dist_cho,hands_distance):
     #기준에 따라 상태 출력
     list = [0, 0, 0, 0]
 
@@ -87,7 +87,7 @@ def estimation_pose(center_mouth_dist_cho):
     # 턱괴기
     hands.Enqueue(hands.data)
     hands.average_output()
-    if hands.output > 5:
+    if hands.output > hands_distance:
         list[2] = 0
     else:
         list[2] = 1
@@ -113,9 +113,9 @@ def result_pose(list):
         list[0] = 2
 
     # 거북목
-    if list[1] < 10:
+    if list[1] < 15:
         list[1] = 0
-    elif list[1] >= 10 and list[1] < 30:
+    elif list[1] >= 15 and list[1] < 40:
         list[1] = 1
     else:
         list[1] = 2
