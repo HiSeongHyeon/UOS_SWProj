@@ -16,6 +16,7 @@ from HPE.class_mod import *
 # DB 연결부
 from DB.db import * # import <사용할 클래스 혹은 함수>
 
+#비디오 객체 담는 변수#
 video_frames = [None]
 
 # PyInstaller 경로 찾기 함수
@@ -33,7 +34,7 @@ def Login_Window(db):
     login_win.resizable(width=0, height=0)
     login_win.title("HPE_Login")
     login_win.iconbitmap("UI/img/logo.ico")
-    # 기본 창에 들어갈 전체 이미지 설정
+    # 로그인 창에 들어갈 배경경 이미지 설정
     image_path1 = resource_path("UI/img/login_bg.png")
     login_win.frame_photo = PhotoImage(file = image_path1,master=login_win)
     frame_label = Label(login_win, border = 0, image = login_win.frame_photo)
@@ -134,7 +135,7 @@ def Join_Window(db):
     join_win.resizable(width=0, height=0)
     join_win.title("HPE_Join")
     join_win.iconbitmap("UI/img/logo.ico")
-    # 기본 창에 들어갈 전체 이미지 설정
+    # 회원가입 창에 들어갈 배경경 이미지 설정
     image_path4 = resource_path("UI/img/join_bg.png")
     join_win.frame_photo = PhotoImage(file = image_path4,master=join_win)
     frame_label = Label(join_win, border = 0, image = join_win.frame_photo)
@@ -420,7 +421,8 @@ def RegiPose_Window(db):
 
             # 마지막 출력 시간 갱신
             config.last_time = current_time
-        
+
+        #바다오 이미지 객체 변환 및 재생 
         img = Image.fromarray(image)
         imgtk = ImageTk.PhotoImage(image=img)         
         video_frames[0]=imgtk
@@ -450,7 +452,7 @@ def RegiHand_Window(db):
     hand_win.title("HPE_Hand_Register")
     hand_win.iconbitmap("UI/img/logo.ico")
     
-    # 기본 창에 들어갈 전체 이미지 설정
+    # 등록 창에 들어갈 배경 이미지 설정
     image_path9 = resource_path("UI/img/regi_bg.png")
     hand_win.frame_photo = PhotoImage(file = image_path9,master=hand_win)
     frame_label = Label(hand_win, border = 0, image = hand_win.frame_photo)
@@ -622,9 +624,10 @@ def RegiHand_Window(db):
 
             # 마지막 출력 시간 갱신
             config.last_time = current_time
-        
+
+        #비디오 객체 저장 및 재생
         img = Image.fromarray(image)
-        imgtk = ImageTk.PhotoImage(image=img)            ##여기도 해결 필요
+        imgtk = ImageTk.PhotoImage(image=img)
         video_frames[0]=imgtk
         lbl_video2.configure(image=imgtk)
         lbl_video2.imgtk = imgtk
@@ -638,10 +641,6 @@ def RegiHand_Window(db):
     hand_win.bind("<Shift-X>", on_close)
     hand_win.protocol("WM_DELETE_WINDOW", on_close)
     hand_win.mainloop()
-
-
-
-
 
 
 # 화면 5. 메인 window
@@ -694,7 +693,6 @@ def Main_Window(db):
         new_win.attributes('-alpha', 1)
 
         # 이미지 설정
-        
         image_path13 = resource_path("UI/img/spine1.png")
         new_win.mini1_1 = PhotoImage(file=image_path13, master=new_win)
         image_path14 = resource_path("UI/img/spine2.png")
@@ -782,7 +780,7 @@ def Main_Window(db):
     main_win.resizable(width=0, height=0)
     main_win.title("Duhoi And Jeungjae")
     main_win.iconbitmap("UI/img/logo.ico")
-    # 기본 창에 들어갈 전체 이미지 설정
+    # 메인 창에 들어갈 배경 이미지 설정
     image_path23 = resource_path("UI/img/main_bg.png")
     main_win.frame_photo = PhotoImage(file = image_path23,master=main_win)
     frame_label = Label(main_win, border = 0, image = main_win.frame_photo)
@@ -1069,6 +1067,8 @@ def Main_Window(db):
             # 마지막 출력 시간 갱신
             config.last_time = current_time
         disappear_button.config(command=on_minimize)
+
+        #비디오 객체 저장 및 재생 
         img = Image.fromarray(image)
         imgtk = ImageTk.PhotoImage(image=img)   ##여기도 마찬가지
         video_frames[0]=imgtk
