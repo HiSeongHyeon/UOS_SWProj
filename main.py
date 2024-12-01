@@ -7,6 +7,8 @@ from UI.interface import RegiPose_Window
 from UI.interface import RegiHand_Window
 from UI.interface import Main_Window
 
+
+######## 에러 제거 위한 모듈###############
 import sys
 import config
 
@@ -21,6 +23,8 @@ if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
 
     sys.stdout = NullOutput()
     sys.stderr = NullOutput()
+
+##################################
 
 # HPE 모듈에서 사용하는 함수
 # from HPE import HPE_test_ver2
