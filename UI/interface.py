@@ -227,6 +227,22 @@ def Join_Window(db):
     next_button = Button(join_win, image = join_win.next_image, border = 0, bg = "#CBDAEC")
     next_button.config(command=click)
     next_button.place(x = 150, y = 480)
+    
+    def logout():
+        config.flag_win = 1
+        config.count_time = 1
+        config.disappear = 0
+        config.last_time = 0
+        config.cnt = 0
+        config.complete = 0
+        join_win.destroy()
+
+    # 로그아웃 버튼
+    image_path37 = resource_path("UI/img/logout_bt.png")
+    join_win.logout_image = PhotoImage(file = image_path37,master=join_win)
+    logout_button = Button(join_win, image = join_win.logout_image, border = 0, bg = "#C2D6E9")
+    logout_button.config(command=logout)
+    logout_button.place(x = 442, y = 576)
 
     # 엔터키 설정
     join_win.bind("<Return>", lambda event: click())
@@ -1083,4 +1099,3 @@ def Main_Window(db):
     # 종료 키 설정 및 창 루프 생성
     main_win.protocol("WM_DELETE_WINDOW", on_close)
     main_win.mainloop()
-
