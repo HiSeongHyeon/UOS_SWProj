@@ -333,7 +333,7 @@ def regi_pose_window(db):
     
 
     # 창닫기 함수
-    def on_close():
+    def on_close(event):
         if cap.isOpened():
             cap.release()   # 카메라 리소스 해제
         regi_win.destroy()
@@ -376,12 +376,14 @@ def regi_pose_window(db):
                     landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2)
                 )
         
-        ########################################경호형########################################
+
         current_time = time.time()
+        # 1초마다 key point 추출 및 자세 정보 추출
         if current_time - config.last_time >= 1.0:
-            # [[틀린 기준 판단]] HPE를 성공한다면 출력 - README 파일의 키포인트 넘버 확인
+
+            # [틀린 기준 판단] HPE를 성공한다면 key point 출력 
             if results.pose_landmarks:
-                # left shoulder (index 11), right shoulder (index 12)
+                
                 # 단일 키 포인트
                 left_shoulder = results.pose_landmarks.landmark[11]
                 right_shoulder = results.pose_landmarks.landmark[12]
@@ -390,29 +392,30 @@ def regi_pose_window(db):
                 left_wrist = results.pose_landmarks.landmark[28]
                 right_wrist = results.pose_landmarks.landmark[29]
 
-                # angle_shoulder 
+                # angle_shoulder: 어깨가 기울어진 각도를 계산하여 허리 기울임 자세 정보 추출
                 config.keyPoint_list[0] = abs(math.degrees(math.atan(right_shoulder.y - left_shoulder.y)/(right_shoulder.x - left_shoulder.x)))
                 
-                # center_shoulder_dist 
+                # center_shoulder_dist: 어깨의 중앙과 웹캠 사이의 거리(z값) 추출
                 config.keyPoint_list[1] = (left_shoulder.z + right_shoulder.z)/2
                 
-                # center_mouth_dist 
+                # center_mouth_dist: 입의 중앙과 웹캠 사이의 거리(z값) 추출
                 config.keyPoint_list[2] = (left_mouth.z + right_mouth.z)/2
                 
-                # left_hand_distance 
+                # left_hand_distance: 왼손과 왼쪽 입꼬리 사이의 거리 추출
                 config.keyPoint_list[3] = math.sqrt((left_mouth.x - left_wrist.x)**2 + (left_mouth.y - left_wrist.y)**2 + (left_mouth.z - left_wrist.z)**2)
                 
-                # right_hand_distance 
+                # right_hand_distance: 오른손과 오른쪽 입꼬리 사이의 거리 추출
                 config.keyPoint_list[4] = math.sqrt((right_mouth.x - right_wrist.x)**2 + (right_mouth.y - right_wrist.y)**2 + (right_mouth.z - right_wrist.z)**2)
                 
                 i=0
 
-                # 자세 등록
-                # 매 초마다 keyPoint_list를 pose_list에 저장(~cnt 9까지), cnt가 10이 되면 기존에 저장해온 값을 평균내서 출력  
+                # [자세 등록]
+                # 매 초마다 keyPoint_list를 pose_list에 저장(9초 동안), cnt가 10이 되면 기존에 저장해온 값을 평균내서 출력  
                 config.pose_list = config.save_pose(config.cnt, config.keyPoint_list, config.pose_list, i)
                 
-                # 자세 정보 등록 버튼 클릭 시 동작 함수
-                def click():
+                # pose register 버튼 클릭 함수
+                def click_regi():
+                    # 자세 등록 버튼 클릭 이후에는 더이상 자세 정보를 추출하지 않기 위해 시간 값 초기화 및 flag 값 변경 / 추출한 정보 DB에 저장
                     config.count_time = 1
                     config.last_time = 0
                     config.cnt = 0
@@ -422,9 +425,10 @@ def regi_pose_window(db):
                     config.flag_win = 4
                     regi_win.destroy()
                     
-                # start 버튼 클릭 시 동작 함수
-                def start_reclick():
-                    for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                 # start 버튼 클릭 함수
+                def click_start():
+                    # 기본적인 동작은 click_regi()과 동일, 자세 정보를 추출하기 위해 변수 및 자세 정보 리스트 초기화
+                    for j in range(5):      
                         config.pose_list[j] = 0.0
                     config.cnt = 0
                     config.complete = 0
@@ -432,47 +436,46 @@ def regi_pose_window(db):
                     guide_lab.config(text="카메라를 10초간 응시하세요. 사용자 자세 등록을 실행 중 입니다.", fg = "red")
                     guide_lab.place(x = 75, y = 72)
                     start_button.place_forget()
-                start_button.config(command = start_reclick)
+                start_button.config(command = click_start)
                 
-                if config.cnt_start:
-                    # 확인용 출력 코드(이후 삭제 필요)                
+                # start 버튼을 누른 이후 1초마다 카운트 계산
+                if config.cnt_start:                
                     if config.cnt > 9: 
                         guide_lab.config(text = "Restart 버튼을 눌러 재등록하거나 Register 버튼을 눌러 다음창으로 넘어가세요.", fg = "green")
                         guide_lab.place(x = 15, y = 72)
 
-                        print(config.cnt)
-                        for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                        for j in range(5):             # 자세를 등록한 후 자세 정보 리스트 초기화
                             print(config.pose_list[j])
-                        config.complete = 1            # UI팀에게 넘겨줄 flag
+                        config.complete = 1            # 자세 등록이 완료되면 더 이상 key point로 부터 자세 추출을 하지 않음
 
-                    # restart 버튼 클릭 시 동작 함수
-                    def reclick():
-                        for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                    # restart 버튼 클릭 함수
+                    def click_restart():
+                        # 자세 정보를 다시 추출하기 위해 변수 및 자세 정보 리스트 초기화
+                        for j in range(5):      
                             config.pose_list[j] = 0.0
                         config.cnt = 0
                         config.complete = 0
                         config.cnt_start = 1
-                        guide_lab.config(text = "카메라를 10초간 응시하세요. 사용자 자세 등록을 실행 중 입니다.", fg = "red")
+                        guide_lab.config(text="카메라를 10초간 응시하세요. 사용자 자세 등록을 실행 중 입니다.", fg = "red")
                         guide_lab.place(x = 65, y = 72)
                         register_button.place_forget()
 
-                    # 10초 간 자세 정보를 얻으면 등록이나 재등록 버튼 생성
+                    # 자세 정보 추출이 완료되면 적절한 버튼을 눌러 다음 동작 실행
                     if config.complete == 1:
-                        restart_button.config(command = reclick)
+                        restart_button.config(command = click_restart)
                         restart_button.place(x = 205, y = 485)
                         
-                        register_button.config(command = click)
+                        register_button.config(command = click_regi)
                         register_button.place(x = 205, y = 540)
                         
                     config.cnt += 1
 
-            else:
+            elif config.cnt >= 1:
                # 화면에 keyPoint가 생성되지 않을 경우
-               print("화면에 자세가 보이도록 앉아주세요.")
+               guide_lab.config(text = "   사용자 자세 등록을 위해 카메라에 점이 생기도록 해주세요   ", fg = "red")
 
             # 마지막 출력 시간 갱신
             config.last_time = current_time
-        ########################################경호형########################################
 
         # 비디오 이미지 객체 변환 및 재생 
         img = Image.fromarray(image)
@@ -551,7 +554,7 @@ def regi_hand_window(db):
     mp_pose = mp.solutions.pose
     
     # 창닫기 함수
-    def on_close():
+    def on_close(event):
         if cap.isOpened():
             cap.release()   # 카메라 리소스 해제
         hand_win.destroy()
@@ -591,13 +594,14 @@ def regi_hand_window(db):
                     mp_pose.POSE_CONNECTIONS,
                     landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2)
                 )
-        ########################################경호형########################################        
+     
         current_time = time.time()
+        # 1초마다 key point 추출 및 자세 정보 추출
         if current_time - config.last_time >= 1.0:
 
-            # [[틀린 기준 판단]] HPE를 성공한다면 출력 - README 파일의 키포인트 넘버 확인
+            # [틀린 기준 판단] HPE를 성공한다면 key point 출력 
             if results.pose_landmarks:
-                # left shoulder (index 11), right shoulder (index 12)
+                
                 # 단일 키 포인트
                 left_shoulder = results.pose_landmarks.landmark[11]
                 right_shoulder = results.pose_landmarks.landmark[12]
@@ -606,29 +610,30 @@ def regi_hand_window(db):
                 left_wrist = results.pose_landmarks.landmark[28]
                 right_wrist = results.pose_landmarks.landmark[29]
 
-                # angle_shoulder 
+                # angle_shoulder: 어깨가 기울어진 각도를 계산하여 허리 기울임 자세 정보 추출
                 config.keyPoint_list[0] = abs(math.degrees(math.atan(right_shoulder.y - left_shoulder.y)/(right_shoulder.x - left_shoulder.x)))
                 
-                # center_shoulder_dist 
+                # center_shoulder_dist: 어깨의 중앙과 웹캠 사이의 거리(z값) 추출
                 config.keyPoint_list[1] = (left_shoulder.z + right_shoulder.z)/2
                 
-                # center_mouth_dist 
+                # center_mouth_dist: 입의 중앙과 웹캠 사이의 거리(z값) 추출
                 config.keyPoint_list[2] = (left_mouth.z + right_mouth.z)/2
                 
-                # left_hand_distance 
+                # left_hand_distance: 왼손과 왼쪽 입꼬리 사이의 거리 추출
                 config.keyPoint_list[3] = math.sqrt((left_mouth.x - left_wrist.x)**2 + (left_mouth.y - left_wrist.y)**2 + (left_mouth.z - left_wrist.z)**2)
                 
-                # right_hand_distance 
+                # right_hand_distance: 오른손과 오른쪽 입꼬리 사이의 거리 추출
                 config.keyPoint_list[4] = math.sqrt((right_mouth.x - right_wrist.x)**2 + (right_mouth.y - right_wrist.y)**2 + (right_mouth.z - right_wrist.z)**2)
                 
                 i=0
 
-                # 자세 등록
-                # 매 초마다 keyPoint_list를 pose_list에 저장(~cnt 9까지), cnt가 10이 되면 기존에 저장해온 값을 평균내서 출력  
+                # [자세 등록]
+                # 매 초마다 keyPoint_list를 pose_list에 저장(9초 동안), cnt가 10이 되면 기존에 저장해온 값을 평균내서 출력  
                 config.pose_list = config.save_pose(config.cnt, config.keyPoint_list, config.pose_list, i)
-
-                # 자세 정보 등록 버튼 클릭 시 동작 함수
-                def click():
+                
+                # pose register 버튼 클릭 함수
+                def click_regi():
+                    # 자세 등록 버튼 클릭 이후에는 더이상 자세 정보를 추출하지 않기 위해 시간 값 초기화 및 flag 값 변경 / 추출한 정보 DB에 저장
                     config.count_time = 1
                     config.last_time = 0
                     config.cnt = 0
@@ -638,9 +643,10 @@ def regi_hand_window(db):
                     config.flag_win = 5
                     hand_win.destroy()
 
-                # start 버튼 클릭 시 동작 함수
-                def start_reclick():
-                    for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                # start 버튼 클릭 함수
+                def click_start():
+                    # 기본적인 동작은 click_regi()와 동일, 자세 정보를 추출하기 위해 변수 및 자세 정보 리스트 초기화
+                    for j in range(5):                      
                         config.pose_list[j] = 0.0
                     config.cnt = 0
                     config.complete = 0
@@ -648,23 +654,23 @@ def regi_hand_window(db):
                     guide_lab.config(text="10초간 손을 들고 있으세요. 손 정보 등록을 실행 중 입니다.", fg = "red")
                     guide_lab.place(x = 95, y = 72)
                     start_button.place_forget()
-                start_button.config(command = start_reclick)
-                
 
-                if config.cnt_start:
-                    # 확인용 출력 코드(이후 삭제 필요)                
+                start_button.config(command = click_start)
+                
+                # start 버튼을 누른 이후 1초마다 카운트 계산
+                if config.cnt_start:            
                     if config.cnt > 9: 
                         guide_lab.config(text = "Restart 버튼을 눌러 재등록하거나 Register 버튼을 눌러 등록을 완료하세요.", fg = "green")
                         guide_lab.place(x = 30, y = 72)
 
-                        print(config.cnt)
-                        for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                        for j in range(5):             # 자세를 등록한 후 자세 정보 리스트 초기화
                             print(config.pose_list[j])
-                        config.complete = 1            # UI팀에게 넘겨줄 flag
+                        config.complete = 1            # 자세 등록이 완료되면 더 이상 key point로 부터 자세 추출을 하지 않음
 
-                    # restart 버튼 클릭 시 동작 함수
-                    def reclick():
-                        for j in range(5):      # 자세를 등록한 후 자세 정보 리스트 초기화
+                    # restart 버튼 클릭 함수
+                    def click_restart():
+                        # 자세 정보를 다시 추출하기 위해 변수 및 자세 정보 리스트 초기화
+                        for j in range(5):             
                             config.pose_list[j] = 0.0
                         config.cnt = 0
                         config.complete = 0
@@ -673,24 +679,22 @@ def regi_hand_window(db):
                         guide_lab.place(x = 95, y = 72)
                         register_button.place_forget()
 
-                    # 10초 간 자세 정보를 얻으면 등록이나 재등록 버튼 생성
+                    # 자세 정보 추출이 완료되면 적절한 버튼을 눌러 다음 동작 실행
                     if config.complete == 1:
-                        restart_button.config(command = reclick)
+                        restart_button.config(command = click_restart)
                         restart_button.place(x = 205, y = 485)
                         
-                        register_button.config(command = click)
+                        register_button.config(command = click_regi)
                         register_button.place(x = 205, y = 540)
                         
                     config.cnt += 1
                     
-            else:
+            elif config.cnt >= 1:
                # 화면에 keyPoint가 생성되지 않을 경우
-               print("화면에 자세가 보이도록 앉아주세요.")
+               guide_lab.config(text = "   사용자 자세 등록을 위해 카메라에 점이 생기도록 해주세요   ", fg = "red")
 
             # 마지막 출력 시간 갱신
             config.last_time = current_time
-        ########################################경호형########################################
-
         #비디오 객체 저장 및 재생
         img = Image.fromarray(image)
         imgtk = ImageTk.PhotoImage(image = img)
