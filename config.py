@@ -19,10 +19,12 @@ outputList = []
 
 def average_pose(cnt, data, listData, i):
 
+    # 실시간 자세 정보 저장
     if cnt < 10:
         listData[i] = listData[i] + data
         return listData[i]
         
+    # 10초 동안의 자세 정보에 대한 평균을 저장하고 반환한다.    
     else:  
         if cnt == 10:
             average = listData[i]/10
@@ -53,7 +55,7 @@ q_brightness  = Queue(maxsize=10)
 def initialize_queue(size, initial_value):
     q = Queue(maxsize=size)  # 최대 크기를 설정
     for _ in range(size):
-        q.put(initial_value)  # 초기값 추가
+        q.put(initial_value)  # 초깃값 추가
     return q
 
 q_angle_waist = initialize_queue(5, 0)
@@ -70,22 +72,22 @@ brightness = brightness(data = 0.0, queue = q_brightness, output = 0.0)
 
 
 def estimation_pose(center_mouth_dist_DB,hands_distance_DB):
-    #기준에 따라 상태 출력
+    #기준에 따라 상태를 반환할 리스트
     list = [0, 0, 0, 0]
 
-    # 허리 기울임은 비율로 나타내기 어려움(애초에 0도를 정상으로 시작하기 때문 / 0도~4도 정상 / 4 ~ 7도 주의 / 7 ~ 10도 이상 경고 )
-    angle_waist.Enqueue(abs(angle_waist.data))
+    # 허리 기울임(기울어진 각도 반환)
+    angle_waist.enqueue(abs(angle_waist.data))                  
     angle_waist.average_output()
     list[0] = angle_waist.output
     
 
-    # 거북목
-    turttle_neck.Enqueue(turttle_neck.data)
+    # 거북목(DB에 저장된 사용자별 바른 자세 정보와의 상대 오차 반환)
+    turttle_neck.enqueue(turttle_neck.data)
     turttle_neck.average_output()
     list[1] = (turttle_neck.output/center_mouth_dist_DB - 1.0)*100
 
-    # 턱괴기
-    hands.Enqueue(hands.data)
+    # 턱괴기(DB에 저장된 사용자별 바른 자세 정보와의 비교를 통한 판단 결과 반환)
+    hands.enqueue(hands.data)
     hands.average_output()
     if hands.output >= hands_distance_DB:
         list[2] = 0
@@ -93,8 +95,8 @@ def estimation_pose(center_mouth_dist_DB,hands_distance_DB):
         list[2] = 1
         
     
-    # 밝기
-    brightness.Enqueue(brightness.data)
+    # 밝기(절대적인 밝기 기준과의 비교를 통한 판단 결과 반환)
+    brightness.enqueue(brightness.data)
     brightness.average_output()
     if brightness.output > 60:
         list[3] = 0
@@ -104,15 +106,16 @@ def estimation_pose(center_mouth_dist_DB,hands_distance_DB):
     return list
 
 def result_pose(list):
-    # 허리 각도
-    if list[0] < 5:
+    
+    # 허리 각도 (단계 1: 5도 이하 / 단계 2: 5~15도 / 단계 3: 15도 이상)
+    if list[0] < 5:                     
         list[0] = 0
     elif list[0] >= 5 and list[0] < 15:
         list[0] = 1
     else:
         list[0] = 2
 
-    # 거북목
+    # 거북목 (단계 1: 15% 이하 / 단계 2: 15~40% / 단계 3: 40% 이상)       
     if list[1] < 15:
         list[1] = 0
     elif list[1] >= 15 and list[1] < 40:
@@ -120,16 +123,17 @@ def result_pose(list):
     else:
         list[1] = 2
 
-    # 턱괴기
+    # 턱괴기(턱을 괴고 있음(1) / 괴고 있지 않음(0))
     if list[2]:
         list[2] = 1
     else:
         list[2] = 0
 
-    # 밝기
+    # 밝기(밝기가 어두움(1) / 어둡지 않음(0))
     if list[3]:
         list[3] = 1
     else:
         list[3] = 0
 
     return list
+
