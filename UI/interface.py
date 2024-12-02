@@ -227,7 +227,7 @@ def Join_Window(db):
     next_button = Button(join_win, image = join_win.next_image, border = 0, bg = "#CBDAEC")
     next_button.config(command=click)
     next_button.place(x = 150, y = 480)
-    
+
     def logout():
         config.flag_win = 1
         config.count_time = 1
@@ -236,7 +236,7 @@ def Join_Window(db):
         config.cnt = 0
         config.complete = 0
         join_win.destroy()
-
+    
     # 로그아웃 버튼
     image_path37 = resource_path("UI/img/logout_bt.png")
     join_win.logout_image = PhotoImage(file = image_path37,master=join_win)
@@ -352,8 +352,8 @@ def RegiPose_Window(db):
                 right_shoulder = results.pose_landmarks.landmark[12]
                 left_mouth = results.pose_landmarks.landmark[9]
                 right_mouth = results.pose_landmarks.landmark[10]
-                left_ankle = results.pose_landmarks.landmark[28]
-                right_ankle = results.pose_landmarks.landmark[29]
+                left_wrist = results.pose_landmarks.landmark[28]
+                right_wrist = results.pose_landmarks.landmark[29]
 
                 # angle_shoulder 
                 config.keyPoint_list[0] = abs(math.degrees(math.atan(right_shoulder.y - left_shoulder.y)/(right_shoulder.x - left_shoulder.x)))
@@ -365,10 +365,10 @@ def RegiPose_Window(db):
                 config.keyPoint_list[2] = (left_mouth.z + right_mouth.z)/2
                 
                 # left_hand_distance 
-                config.keyPoint_list[3] = math.sqrt(10*(left_mouth.x - left_ankle.x)**2 + (left_mouth.y - left_ankle.y)**2 + 10*(left_mouth.z - left_ankle.z)**2)
+                config.keyPoint_list[3] = math.sqrt((left_mouth.x - left_wrist.x)**2 + (left_mouth.y - left_wrist.y)**2 + (left_mouth.z - left_wrist.z)**2)
                 
                 # right_hand_distance 
-                config.keyPoint_list[4] = math.sqrt(10*(right_mouth.x - right_ankle.x)**2 + (right_mouth.y - right_ankle.y)**2 + 10*(right_mouth.z - right_ankle.z)**2)
+                config.keyPoint_list[4] = math.sqrt((right_mouth.x - right_wrist.x)**2 + (right_mouth.y - right_wrist.y)**2 + (right_mouth.z - right_wrist.z)**2)
                 
                 i=0
 
@@ -557,8 +557,8 @@ def RegiHand_Window(db):
                 right_shoulder = results.pose_landmarks.landmark[12]
                 left_mouth = results.pose_landmarks.landmark[9]
                 right_mouth = results.pose_landmarks.landmark[10]
-                left_ankle = results.pose_landmarks.landmark[28]
-                right_ankle = results.pose_landmarks.landmark[29]
+                left_wrist = results.pose_landmarks.landmark[28]
+                right_wrist = results.pose_landmarks.landmark[29]
 
                 # angle_shoulder 
                 config.keyPoint_list[0] = abs(math.degrees(math.atan(right_shoulder.y - left_shoulder.y)/(right_shoulder.x - left_shoulder.x)))
@@ -570,10 +570,10 @@ def RegiHand_Window(db):
                 config.keyPoint_list[2] = (left_mouth.z + right_mouth.z)/2
                 
                 # left_hand_distance 
-                config.keyPoint_list[3] = math.sqrt(10*(left_mouth.x - left_ankle.x)**2 + (left_mouth.y - left_ankle.y)**2 + 10*(left_mouth.z - left_ankle.z)**2)
+                config.keyPoint_list[3] = math.sqrt((left_mouth.x - left_wrist.x)**2 + (left_mouth.y - left_wrist.y)**2 + (left_mouth.z - left_wrist.z)**2)
                 
                 # right_hand_distance 
-                config.keyPoint_list[4] = math.sqrt(10*(right_mouth.x - right_ankle.x)**2 + (right_mouth.y - right_ankle.y)**2 + 10*(right_mouth.z - right_ankle.z)**2)
+                config.keyPoint_list[4] = math.sqrt((right_mouth.x - right_wrist.x)**2 + (right_mouth.y - right_wrist.y)**2 + (right_mouth.z - right_wrist.z)**2)
                 
                 i=0
 
@@ -996,29 +996,39 @@ def Main_Window(db):
                 right_shoulder = results.pose_landmarks.landmark[12]
                 left_mouth = results.pose_landmarks.landmark[9]
                 right_mouth = results.pose_landmarks.landmark[10]
-                left_ankle = results.pose_landmarks.landmark[28]
-                right_ankle = results.pose_landmarks.landmark[29]
+                left_wrist = results.pose_landmarks.landmark[16]
+                right_wrist = results.pose_landmarks.landmark[17]
 
                # 합성 키 포인트
                 angle_shoulder = abs(math.degrees(math.atan(right_shoulder.y - left_shoulder.y)/(right_shoulder.x - left_shoulder.x)))
                 center_mouth_dist = (left_mouth.z + right_mouth.z)/2
-                left_hand_distance = math.sqrt((left_mouth.x - left_ankle.x)**2 + (left_mouth.y - left_ankle.y)**2 + 10*(left_mouth.z - left_ankle.z)**2)
-                right_hand_distance = math.sqrt(10*(right_mouth.x - right_ankle.x)**2 + (right_mouth.y - right_ankle.y)**2 ) #+ 10*(right_mouth.z - right_ankle.z)**2
+                left_hand_distance = math.sqrt((left_mouth.x - left_wrist.x)**2 + (left_mouth.y - left_wrist.y)**2 + (left_mouth.z - left_wrist.z)**2)
+                right_hand_distance = math.sqrt(10*(right_mouth.x - right_wrist.x)**2 + (right_mouth.y - right_wrist.y)**2 + (right_mouth.z - right_wrist.z)**2)
                 
                 config.angle_waist.data = angle_shoulder
                 config.turttle_neck.data = center_mouth_dist
 
-                if 10000*left_ankle.visibility >= 0.1 and 10000*right_ankle.visibility >= 0.1:
+                # 손 key point가 화면에 보이는 정도를 반환하는 신뢰도를 바탕으로 자세 판단 파라미터 활용 여부 판정
+                if left_wrist.visibility >= 0.5 and right_wrist.visibility >= 0.5:
                     config.hands.data = min(left_hand_distance, right_hand_distance)
-                elif 10000*left_ankle.visibility >= 0.1 and 10000*right_ankle.visibility < 0.1:
+                elif left_wrist.visibility >= 0.5 and right_wrist.visibility < 0.5:
                     config.hands.data = left_hand_distance
-                elif 10000*left_ankle.visibility < 0.1 and 10000*right_ankle.visibility >= 0.1:
+                elif left_wrist.visibility < 0.5 and right_wrist.visibility >= 0.5:
                     config.hands.data = right_hand_distance
                 else:
-                    config.hands.data = hand_distance_DB
+                    config.hands.data = hand_distance_DB + 1
                              
-                
-                config.outputList = config.result_pose(config.estimation_pose(center_mouth_dist_DB ,hand_distance_DB))   # 파라미터에 center_mouth_dist랑 hand_distance 보내야함!
+                # if left_wrist.y <= left_mouth.y and right_wrist.y <= right_mouth.y:
+                #     config.hands.data = min(left_hand_distance, right_hand_distance)
+                # elif left_wrist.y <= left_mouth.y and right_wrist.y > right_mouth.y:
+                #     config.hands.data = left_hand_distance
+                # elif left_wrist.y > left_mouth.y and right_wrist.y <= right_mouth.y:
+                #     config.hands.data = right_hand_distance
+                # else:
+                #     config.hands.data = hand_distance_DB
+
+                # DB로 부터 center_mouth_dist랑 hand_distance를 받아와 자세 판단 함수의 파라미터로 제공
+                config.outputList = config.result_pose(config.estimation_pose(center_mouth_dist_DB ,hand_distance_DB))   
 
                 # 어깨 판단 
                 if config.outputList[0] == 1:
@@ -1055,10 +1065,14 @@ def Main_Window(db):
                     lbl_alarm.config(text = (user_name + "  |  최근 알림: 자세 알림이 없습니다."), fg = "black")
 
 
-                 # 디버깅용
-                #print(10000*left_ankle.visibility)
-                #print(10000*right_ankle.visibility)
-                #print(config.hands.output)
+                # 디버깅용
+                # print(10000*left_wrist.visibility)
+                # print(10000*right_wrist.visibility)
+                print(config.hands.output)
+                print(config.hands.data)
+                print(left_wrist.visibility)
+                print(right_wrist.visibility)
+                print(hand_distance_DB)
                 #print(config.estimation_pose())
 
                 # for i in range(4):
@@ -1068,12 +1082,14 @@ def Main_Window(db):
                 #print(f"data = {angle_waist.data:.4f}")
                 #print(f"output = {angle_waist.output:.4f}")    
             else: 
+                config.outputList = [0, 0, 0, 0]    # 자리비움일때는 자세판단 결과를 초기화한 후 출력 >>>> 근데 자리 비움이 뜨면 UI 이미지 출력을 안해서 바뀌지 않음
+
+                # 자리비움 판단 로직 - 10초 이상 화면에 신체 key point가 잡히지 않으면 자리 비움으로 판단
                 config.cnt += 1
-                if config.cnt > 10: # 확인 빠르게 하기 위해 10초로 설정, 추후에 1분으로 고치면 될 듯
+                if config.cnt > 10: 
                     config.disappear = 1
                 else:
                     config.disappear = 0
-                ####################################################
                 
             print(config.cnt)
             if config.disappear == 1:
@@ -1099,3 +1115,4 @@ def Main_Window(db):
     # 종료 키 설정 및 창 루프 생성
     main_win.protocol("WM_DELETE_WINDOW", on_close)
     main_win.mainloop()
+
