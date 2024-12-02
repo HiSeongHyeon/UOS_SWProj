@@ -420,6 +420,7 @@ def regi_pose_window(db):
                     config.last_time = 0
                     config.cnt = 0
                     db.insert_hpe_data(config.pose_list[0], config.pose_list[1], config.pose_list[2])
+                    db.insert_hpe_hands_data(config.pose_list[3], config.pose_list[4])
                     config.complete = 0
                     config.cnt_start = 0
                     config.flag_win = 4
