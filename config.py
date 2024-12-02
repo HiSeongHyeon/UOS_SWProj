@@ -69,7 +69,7 @@ hands = hands(data = 0.0, queue = q_hands, output = 0.0)
 brightness = brightness(data = 0.0, queue = q_brightness, output = 0.0)
 
 
-def estimation_pose(center_mouth_dist_cho,hands_distance):
+def estimation_pose(center_mouth_dist_DB,hands_distance_DB):
     #기준에 따라 상태 출력
     list = [0, 0, 0, 0]
 
@@ -82,12 +82,12 @@ def estimation_pose(center_mouth_dist_cho,hands_distance):
     # 거북목
     turttle_neck.Enqueue(turttle_neck.data)
     turttle_neck.average_output()
-    list[1] = (turttle_neck.output/center_mouth_dist_cho - 1.0)*100
+    list[1] = (turttle_neck.output/center_mouth_dist_DB - 1.0)*100
 
     # 턱괴기
     hands.Enqueue(hands.data)
     hands.average_output()
-    if hands.output > hands_distance:
+    if hands.output >= hands_distance_DB:
         list[2] = 0
     else:
         list[2] = 1
