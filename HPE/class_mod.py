@@ -1,10 +1,11 @@
-# 판단할 자세별 클래스
+# 판단할 자세 별 클래스
 class angle_waist:
     def __init__(self, data, queue, output): 
         self.data = data 
         self.queue = queue
         self.output = output 
     
+    # 큐의 데이터에 대한 평균 계산
     def average_output(self):
         total = 0
         temp_list = []
@@ -23,7 +24,8 @@ class angle_waist:
         self.output = total / len(temp_list)
         return self.output
     
-    def Enqueue(self, data):
+    # 선입 선출을 고려한 큐 정보 저장
+    def enqueue(self, data):
         self.queue.get()
         self.queue.put(data)
 
@@ -51,7 +53,7 @@ class turttle_neck:
         self.output = total / len(temp_list)
         return self.output 
     
-    def Enqueue(self, data):
+    def enqueue(self, data):
         self.queue.get()
         self.queue.put(data)
 
@@ -79,7 +81,7 @@ class hands:
         self.output = total / len(temp_list)
         return self.output  
     
-    def Enqueue(self, data):
+    def enqueue(self, data):
         self.queue.get()
         self.queue.put(data)
 
@@ -107,6 +109,6 @@ class brightness:
         self.output = total / len(temp_list)
         return self.output
     
-    def Enqueue(self, data):
+    def enqueue(self, data):
         self.queue.get()
         self.queue.put(data)
