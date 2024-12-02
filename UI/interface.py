@@ -1067,19 +1067,20 @@ def main_window(db):
         
         ########################################경호형########################################
 
-        # [[판단 시간 설정]] 1초마다 좌표 추출 및 출력
+        # [판단 시간 설정] 1초마다 좌표 추출 및 출력
         current_time = time.time()
         if current_time - config.last_time >= 1.0:
-            # [[틀린 기준 판단]] HPE를 성공한다면 출력 - README 파일의 키포인트 넘버 확인
+            # [틀린 기준 판단] HPE를 성공한다면 출력 
             if results.pose_landmarks:
-                config.cnt = 0 # 사람이 자리에 있다는 것이므로 자리비움 카운트 초기화
+                # 사람이 자리에 있다는 것이므로 자리비움 카운트 및 변수 초기화
+                config.cnt = 0 
                 config.disappear = 0
 
-                # DB에 등록된 자세 판단 기준
+                # DB에 등록된 자세 판단 기준 불러오기
                 center_mouth_dist_DB = hpe_data_DB[2]
                 hand_distance_DB = min(hpe_data_DB[3], hpe_data_DB[4])
 
-                # 단일 키 포인트
+                # 단일 키 포인트 
                 left_shoulder = results.pose_landmarks.landmark[11]
                 right_shoulder = results.pose_landmarks.landmark[12]
                 left_mouth = results.pose_landmarks.landmark[9]
@@ -1087,16 +1088,17 @@ def main_window(db):
                 left_wrist = results.pose_landmarks.landmark[16]
                 right_wrist = results.pose_landmarks.landmark[17]
 
-               # 합성 키 포인트
+               # 합성 키 포인트 (자세 등록시 사용했던 키 포인트와 동일)
                 angle_shoulder = abs(math.degrees(math.atan(right_shoulder.y - left_shoulder.y)/(right_shoulder.x - left_shoulder.x)))
                 center_mouth_dist = (left_mouth.z + right_mouth.z)/2
                 left_hand_distance = math.sqrt((left_mouth.x - left_wrist.x)**2 + (left_mouth.y - left_wrist.y)**2 + (left_mouth.z - left_wrist.z)**2)
                 right_hand_distance = math.sqrt(10*(right_mouth.x - right_wrist.x)**2 + (right_mouth.y - right_wrist.y)**2 + (right_mouth.z - right_wrist.z)**2)
                 
+                # 자세 별 클래스에 합성 키 포인트 정보 전달
                 config.angle_waist.data = angle_shoulder
                 config.turttle_neck.data = center_mouth_dist
 
-                # 손 key point가 화면에 보이는 정도를 반환하는 신뢰도를 바탕으로 자세 판단 파라미터 활용 여부 판정
+                # 손이 화면에 보이는 정도를 반환하는 신뢰도를 바탕으로 자세 판단 파라미터 활용 여부 판정
                 if left_wrist.visibility >= 0.5 and right_wrist.visibility >= 0.5:
                     config.hands.data = min(left_hand_distance, right_hand_distance)
                 elif left_wrist.visibility >= 0.5 and right_wrist.visibility < 0.5:
@@ -1106,45 +1108,37 @@ def main_window(db):
                 else:
                     config.hands.data = hand_distance_DB + 1
                              
-                # if left_wrist.y <= left_mouth.y and right_wrist.y <= right_mouth.y:
-                #     config.hands.data = min(left_hand_distance, right_hand_distance)
-                # elif left_wrist.y <= left_mouth.y and right_wrist.y > right_mouth.y:
-                #     config.hands.data = left_hand_distance
-                # elif left_wrist.y > left_mouth.y and right_wrist.y <= right_mouth.y:
-                #     config.hands.data = right_hand_distance
-                # else:
-                #     config.hands.data = hand_distance_DB
 
                 # DB로 부터 center_mouth_dist랑 hand_distance를 받아와 자세 판단 함수의 파라미터로 제공
                 config.outputList = config.result_pose(config.estimation_pose(center_mouth_dist_DB ,hand_distance_DB))   
 
-                # 어깨 판단 
+                # 허리 기울어짐 판단 
                 if config.outputList[0] == 1:
-                    lbl_img1.config(image=main_win.img1_2, background = "#CBDAEC", border = 0)
+                    lbl_img1.config(image=main_win.img1_2, background = "#CBDAEC", border=0)
                 elif config.outputList[0] == 2:
-                    lbl_img1.config(image=main_win.img1_3, background = "#CBDAEC", border = 0)
+                    lbl_img1.config(image=main_win.img1_3, background = "#CBDAEC", border=0)
                 else:
-                    lbl_img1.config(image=main_win.img1_1, background = "#CBDAEC", border = 0)
+                    lbl_img1.config(image=main_win.img1_1, background = "#CBDAEC", border=0)
 
                 # 거북목 판단
                 if config.outputList[1] == 1:
-                    lbl_img2.config(image=main_win.img2_2, background = "#CBDAEC", border = 0)
+                    lbl_img2.config(image=main_win.img2_2, background = "#CBDAEC", border=0)
                 elif config.outputList[1] == 2:
-                    lbl_img2.config(image=main_win.img2_3, background = "#CBDAEC", border = 0)
+                    lbl_img2.config(image=main_win.img2_3, background = "#CBDAEC", border=0)
                 else:
-                    lbl_img2.config(image=main_win.img2_1, background = "#CBDAEC", border = 0)
+                    lbl_img2.config(image=main_win.img2_1, background = "#CBDAEC", border=0)
 
                 # 턱괴기 판단
                 if config.outputList[2] == 1:
-                    lbl_img3.config(image=main_win.img3_2, background = "#B0C6E1", border = 0)
+                    lbl_img3.config(image=main_win.img3_2, background = "#B0C6E1", border=0)
                 else:
-                    lbl_img3.config(image=main_win.img3_1, background = "#B0C6E1", border = 0)
+                    lbl_img3.config(image=main_win.img3_1, background = "#B0C6E1", border=0)
 
                 # 환경밝기 판단
                 if config.outputList[3] == 1:
-                    lbl_img4.config(image=main_win.img4_2, background = "#B0C6E1", border = 0)
+                    lbl_img4.config(image=main_win.img4_2, background = "#B0C6E1", border=0)
                 else:
-                    lbl_img4.config(image=main_win.img4_1, background = "#B0C6E1", border = 0)
+                    lbl_img4.config(image=main_win.img4_1, background = "#B0C6E1", border=0)
 
                 # 메시지 변경
                 if (config.outputList[0] != 0 or config.outputList[1] != 0 or config.outputList[2] != 0 or config.outputList[3] != 0): 
@@ -1152,43 +1146,26 @@ def main_window(db):
                 else:
                     lbl_alarm.config(text = (user_name + "  |  최근 알림: 자세 알림이 없습니다."), fg = "black")
 
-
-                # 디버깅용
-                # print(10000*left_wrist.visibility)
-                # print(10000*right_wrist.visibility)
-                print(config.hands.output)
-                print(config.hands.data)
-                print(left_wrist.visibility)
-                print(right_wrist.visibility)
-                print(hand_distance_DB)
-                #print(config.estimation_pose())
-
-                # for i in range(4):
-                #     print(config.outputList[i])
-
-                #print(f"cnt = {angle_waist.cnt:.4f}")
-                #print(f"data = {angle_waist.data:.4f}")
-                #print(f"output = {angle_waist.output:.4f}")    
+            # 키 포인트 정보가 추출되지 않을 경우 (= 자리 비움 상태)
             else: 
-                config.outputList = [0, 0, 0, 0]    # 자리비움일때는 자세판단 결과를 초기화한 후 출력 >>>> 근데 자리 비움이 뜨면 UI 이미지 출력을 안해서 바뀌지 않음
+                config.outputList = [0, 0, 0, 0]    # 자리 비움일때는 자세판단 결과를 초기화한 후 출력 
 
-                # 자리비움 판단 로직 - 10초 이상 화면에 신체 key point가 잡히지 않으면 자리 비움으로 판단
+                # 자리 비움 판단 로직 - 10초 이상 화면에 신체 키 포인트가 잡히지 않으면 자리 비움으로 판단
                 config.cnt += 1
                 if config.cnt > 10: 
                     config.disappear = 1
                 else:
                     config.disappear = 0
-                
-            print(config.cnt)
+
+            # 자리 비움 상태일 때 알림 문구 출력
             if config.disappear == 1:
                 lbl_alarm.config(text = (user_name + "  |  자리 비움"), fg = "black")
 
 
             # 마지막 출력 시간 갱신
             config.last_time = current_time
-        ########################################경호형########################################
         
-        # 백그라운드 화면 전환 실행 조건
+        # 백그라운드 실행 조건: 백그라운드 버튼 클릭
         disappear_button.config(command = on_minimize)
 
         #비디오 객체 저장 및 재생 
